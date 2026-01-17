@@ -13,9 +13,6 @@ const socials = {
   Xiaohongshu: Sparkles,
 };
 
-const stripePattern =
-  "bg-[linear-gradient(135deg,#FDE047_25%,#1D4ED8_25%,#1D4ED8_50%,#FDE047_50%,#FDE047_75%,#1D4ED8_75%,#1D4ED8_100%)] bg-[length:40px_40px]";
-
 const btnStyle =
   "px-6 py-3 bg-white font-black border-2 border-[#172554] shadow-[4px_4px_0px_0px_#172554] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:bg-[#FDE047]";
 
@@ -32,17 +29,15 @@ export default function Home() {
         duration: 12 + index * 2,
         delay: index * 1.2,
       })),
-    []
+    [],
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#FDE047]">
-      <div className={cn("absolute inset-0 opacity-30", stripePattern)} />
-
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)]">
       {bubbles.map((bubble) => (
         <motion.div
           key={bubble.id}
-          className="pointer-events-none absolute bottom-0 rounded-full border-4 border-white/80 bg-white/20"
+          className="pointer-events-none absolute bottom-0 rounded-full border-4 border-[#1D4ED8]/40 bg-white/30"
           style={{
             width: bubble.size,
             height: bubble.size,
@@ -65,7 +60,8 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-3">
           {siteConfig.profile.socials.map((social) => {
-            const Icon = socials[social.platform as keyof typeof socials] ?? Globe;
+            const Icon =
+              socials[social.platform as keyof typeof socials] ?? Globe;
             return (
               <a
                 key={social.platform}
@@ -201,7 +197,7 @@ export default function Home() {
           </div>
         </section>
 
-        <footer className="stripe-pattern rounded-3xl border-4 border-[#172554] p-6 text-[#172554] hard-shadow">
+        <footer className="rounded-3xl border-4 border-[#172554] bg-white/80 p-6 text-[#172554] hard-shadow">
           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>

@@ -1,59 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #fde047;
-  --secondary: #1d4ed8;
-  --accent: #ffffff;
-  --text: #0f172a;
-  --border: #172554;
+    --primary: #fde047;
+    --secondary: #1d4ed8;
+    --accent: #ffffff;
+    --text: #0f172a;
+    --border: #172554;
 }
 
 @theme inline {
-  --color-background: var(--primary);
-  --color-foreground: var(--text);
-  --font-sans: var(--font-display);
+    --color-background: var(--primary);
+    --color-foreground: var(--text);
+    --font-sans: var(--font-display);
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
-  background: var(--primary);
-  color: var(--text);
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    background: var(--primary);
+    color: var(--text);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
 .hard-shadow {
-  box-shadow: 4px 4px 0 0 var(--border);
-}
-
-.stripe-pattern {
-  background-image: linear-gradient(
-    135deg,
-    #fde047 25%,
-    #1d4ed8 25%,
-    #1d4ed8 50%,
-    #fde047 50%,
-    #fde047 75%,
-    #1d4ed8 75%,
-    #1d4ed8 100%
-  );
-  background-size: 40px 40px;
+    box-shadow: 4px 4px 0 0 var(--border);
 }
 
 @keyframes floaty {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  20% {
-    opacity: 0.7;
-  }
-  100% {
-    transform: translateY(-120vh);
-    opacity: 0;
-  }
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateY(-120vh);
+        opacity: 0;
+    }
 }
