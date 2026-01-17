@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+:root {
+    --canvas: #fffbeb;
+    --primary: #fde047;
+    --secondary: #bae6fd;
+    --accent: #fda4af;
+    --text: #475569;
+    --card: rgba(255, 255, 255, 0.75);
+    --shadow: 0 20px 50px rgba(251, 146, 60, 0.08);
+}
+
+@theme inline {
+    --color-background: var(--canvas);
+    --color-foreground: var(--text);
+    --font-sans: var(--font-yuzu);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--canvas);
+    color: var(--text);
+    font-family: var(--font-yuzu), ui-sans-serif, system-ui, sans-serif;
+}
+
+.glass {
+    background: var(--card);
+    backdrop-filter: blur(16px);
+}
+
+.soft-shadow {
+    box-shadow: var(--shadow);
+}
+
+@keyframes floaty {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes bob {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(18px);
+    }
+}
+
+.whale {
+    position: relative;
+    width: 90px;
+    height: 42px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #93c5fd, #67e8f9);
+    animation: bob 6s ease-in-out infinite;
+}
+
+.whale::before {
+    content: "";
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0f172a;
+    opacity: 0.7;
+}
+
+.whale::after {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #bae6fd, #fecaca);
+    transform: rotate(35deg);
+}
