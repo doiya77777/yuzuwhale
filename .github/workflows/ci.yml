@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,3 +28,10 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Notify Feishu on failure
+        if: failure() && env.FEISHU_WEBHOOK != ''
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d "{\"msg_type\":\"text\",\"content\":{\"text\":\"[YuzuWhale CI] ❌ Build failed: $GITHUB_REPOSITORY@$GITHUB_SHA\\nRun: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}}" \
+            "$FEISHU_WEBHOOK"
