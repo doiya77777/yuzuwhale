@@ -21,11 +21,43 @@ type HomeClientProps = {
   data: SiteConfig;
 };
 
+function formatDateLabel(value?: string) {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleDateString("zh-CN", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function getNewsLabel(item: SiteConfig["news"][number]) {
+  return item.date || formatDateLabel(item.publishedAt);
+}
+
 export function HomeClient({ data }: HomeClientProps) {
   const [activeId, setActiveId] = useState<number | null>(null);
   const activeItem = data.gallery.find((item) => item.id === activeId);
-  const showGallery = data.profile.showGallery ?? false;
-  const newsItems = data.news.slice(0, 6);
+  const showGallery =
+    (data.profile.showGallery ?? false) && data.gallery.length > 0;
+  const groupedNews = useMemo(() => {
+    const groups = new Map<
+      string,
+      { date: string; items: SiteConfig["news"] }
+    >();
+    data.news.forEach((item) => {
+      const label = getNewsLabel(item) || "未标注日期";
+      if (!groups.has(label)) {
+        groups.set(label, { date: label, items: [] });
+      }
+      groups.get(label)?.items.push(item);
+    });
+    return Array.from(groups.values()).slice(0, 3);
+  }, [data.news]);
 
   const bubbles = useMemo(
     () =>
@@ -179,36 +211,52 @@ export function HomeClient({ data }: HomeClientProps) {
               </Link>
             </div>
             <div className="space-y-4">
-              {newsItems.length ? (
-                newsItems.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    whileHover={{ rotate: -1, x: 4, y: -4 }}
-                    transition={{ type: "spring", stiffness: 240, damping: 15 }}
+              {groupedNews.length ? (
+                groupedNews.map((group) => (
+                  <div
+                    key={group.date}
                     className="rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <span className="rounded-full bg-[#1D4ED8] px-3 py-1 text-xs font-bold text-white">
-                        {item.date}
+                        {group.date}
                       </span>
-                      <span className="text-xl">{item.emoji}</span>
+                      <span className="text-xs font-semibold text-[#172554]">
+                        共 {group.items.length} 条
+                      </span>
                     </div>
-                    <h3 className="mt-4 text-lg font-black text-[#172554]">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">
-                      {item.summary}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
-                      <span>{item.source}</span>
-                      <Link
-                        href={`/news/${item.id}`}
-                        className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold"
-                      >
-                        查看详情 →
-                      </Link>
+                    <div className="mt-4 space-y-3">
+                      {group.items.slice(0, 3).map((item) => (
+                        <motion.div
+                          key={item.id}
+                          whileHover={{ rotate: -1, x: 4, y: -4 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 240,
+                            damping: 15,
+                          }}
+                          className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4"
+                        >
+                          <div className="flex items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
+                            <span>{item.emoji}</span>
+                            <span>{item.source}</span>
+                          </div>
+                          <h3 className="mt-2 text-base font-black text-[#172554]">
+                            {item.title}
+                          </h3>
+                          <div className="mt-3 flex items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
+                            <span>{getNewsLabel(item)}</span>
+                            <Link
+                              href={`/news/${item.id}`}
+                              className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold"
+                            >
+                              查看详情 →
+                            </Link>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                  </motion.div>
+                  </div>
                 ))
               ) : (
                 <div className="rounded-3xl border-4 border-[#172554] bg-white p-5 text-sm font-semibold text-[#1e3a8a] hard-shadow">

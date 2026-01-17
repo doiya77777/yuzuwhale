@@ -40,7 +40,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
   const { data: newsRows } = await supabase
     .from("news")
     .select(
-      "id,date,emoji,title,summary,source,url,content,content_md,content_html,published_at,sort_order",
+      "id,date,emoji,title,summary,source,url,content_md,content_html,published_at",
     )
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("id", { ascending: false });
@@ -49,11 +49,11 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
     id: Number(item.id),
     date: item.date ?? "",
     emoji: item.emoji ?? "",
-    title: item.title ?? item.content ?? "",
-    summary: item.summary ?? item.content ?? "",
+    title: item.title ?? "",
+    summary: item.summary ?? "",
     source: item.source ?? "",
     url: item.url ?? "",
-    contentMd: item.content_md ?? item.content ?? "",
+    contentMd: item.content_md ?? "",
     contentHtml: item.content_html ?? undefined,
     publishedAt: item.published_at ?? undefined,
   }));
