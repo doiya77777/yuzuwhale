@@ -42,6 +42,8 @@ Set the server-side env vars:
 ```bash
 SUPABASE_URL=your-project-url
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 Run once:
@@ -58,6 +60,8 @@ Add repo secrets:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY` (optional, for AI summaries)
+- `OPENAI_MODEL` (optional)
 
 The workflow `Sync News` runs every 6 hours and can be triggered manually.
 

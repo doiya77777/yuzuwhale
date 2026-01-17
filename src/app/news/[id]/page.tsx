@@ -58,9 +58,10 @@ async function fetchNewsItem(id: number) {
 export default async function NewsDetail({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const id = Number(params.id);
+  const { id: rawId } = await params;
+  const id = Number(rawId);
   if (!Number.isFinite(id)) {
     notFound();
   }
