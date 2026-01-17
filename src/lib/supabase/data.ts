@@ -40,7 +40,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
   const { data: newsRows } = await supabase
     .from("news")
     .select(
-      "id,date,emoji,title,summary,source,url,content_md,content_html,published_at,sort_order",
+      "id,date,emoji,title,summary,source,url,content,content_md,content_html,published_at,sort_order",
     )
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("id", { ascending: false });
