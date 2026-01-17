@@ -1,0 +1,22 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "server": {
+    "hostname": "127.0.0.1",
+    "port": 4096
+  },
+  "mcp": {
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest"],
+      "enabled": true
+    },
+    "websearch": {
+      "type": "remote",
+      "url": "https://mcp.tavily.com",
+      "headers": {
+        "Authorization": "Bearer ${TAVILY_API_KEY}"
+      },
+      "enabled": false
+    }
+  }
+}

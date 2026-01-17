@@ -52,7 +52,7 @@ Run once:
 npm run sync:news
 ```
 
-This will pull latest RSS entries and store `title/summary/content` for the news list and detail page.
+This will pull latest RSS entries, summarize with AI, and store `title/summary/content` for the news list and detail page.
 
 ### GitHub Actions (自动同步)
 

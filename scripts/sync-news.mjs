@@ -15,6 +15,11 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
+if (!OPENAI_API_KEY) {
+  console.error("Missing OPENAI_API_KEY (AI summary is required).");
+  process.exit(1);
+}
+
 const defaultFeeds = [
   {
     name: "OpenAI Blog",
@@ -72,12 +77,6 @@ function stripHtml(input = "") {
     .trim();
 }
 
-function buildSummary(entry, fallback = "") {
-  const source =
-    entry.contentSnippet || entry.summary || entry.content || fallback;
-  return stripHtml(source).slice(0, 180);
-}
-
 function formatDate(value) {
   if (!value) {
     return "";
@@ -93,13 +92,6 @@ function formatDate(value) {
 }
 
 async function summarizeWithAI({ title, text, source, url }) {
-  const fallbackSummary = text.slice(0, 180) || title;
-  const fallbackMd = `## 摘要\n${fallbackSummary}\n\n## 引用\n- 来源：${source}\n- 原文：${url}`;
-
-  if (!OPENAI_API_KEY) {
-    return { summary: fallbackSummary, contentMd: fallbackMd };
-  }
-
   try {
     const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
       method: "POST",
@@ -126,20 +118,23 @@ async function summarizeWithAI({ title, text, source, url }) {
     });
 
     if (!response.ok) {
-      return { summary: fallbackSummary, contentMd: fallbackMd };
+      return null;
     }
 
     const payload = await response.json();
     const content = payload?.choices?.[0]?.message?.content;
     if (!content) {
-      return { summary: fallbackSummary, contentMd: fallbackMd };
+      return null;
     }
 
     const parsed = JSON.parse(content);
-    const summary = String(parsed.summary || fallbackSummary).slice(0, 120);
+    const summary = String(parsed.summary || "").slice(0, 120);
     const bullets = Array.isArray(parsed.bullets)
       ? parsed.bullets.slice(0, 3)
       : [];
+    if (!summary || bullets.length === 0) {
+      return null;
+    }
     const contentMd = `## 摘要\n${summary}\n\n## 要点\n${bullets
       .map((item) => `- ${item}`)
       .join("\n")}\n\n## 引用\n- 来源：${source}\n- 原文：${url}`;
@@ -147,7 +142,7 @@ async function summarizeWithAI({ title, text, source, url }) {
     return { summary, contentMd };
   } catch (error) {
     console.error("OpenAI summary failed", error);
-    return { summary: fallbackSummary, contentMd: fallbackMd };
+    return null;
   }
 }
 
@@ -171,6 +166,10 @@ for (const feed of feeds) {
         source: feed.name,
         url: entry.link,
       });
+      if (!aiResult) {
+        console.error(`AI summary failed for ${entry.link}`);
+        continue;
+      }
 
       items.push({
         date: formatDate(publishedAt),
