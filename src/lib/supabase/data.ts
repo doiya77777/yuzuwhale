@@ -1,4 +1,10 @@
-import type { GalleryItem, NewsItem, Profile, SiteConfig, SocialLink } from "@/data/site-config";
+import type {
+  GalleryItem,
+  NewsItem,
+  Profile,
+  SiteConfig,
+  SocialLink,
+} from "@/data/site-config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const DEFAULT_COLOR = "bg-white";
@@ -11,7 +17,7 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
 
   const { data: profileRow, error: profileError } = await supabase
     .from("profile")
-    .select("name,title,slogan,email,tags,socials")
+    .select("name,title,slogan,email,tags,socials,avatar_url,show_gallery")
     .maybeSingle();
 
   if (profileError || !profileRow) {
@@ -27,19 +33,29 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
     socials: Array.isArray(profileRow.socials)
       ? (profileRow.socials as SocialLink[])
       : [],
+    avatarUrl: profileRow.avatar_url ?? "",
+    showGallery: profileRow.show_gallery ?? false,
   };
 
   const { data: newsRows } = await supabase
     .from("news")
-    .select("id,date,emoji,content,sort_order")
-    .order("sort_order", { ascending: true, nullsFirst: false })
-    .order("id", { ascending: true });
+    .select(
+      "id,date,emoji,title,summary,source,url,content_md,content_html,published_at,sort_order",
+    )
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("id", { ascending: false });
 
   const news: NewsItem[] = (newsRows ?? []).map((item) => ({
     id: Number(item.id),
     date: item.date ?? "",
     emoji: item.emoji ?? "",
-    content: item.content ?? "",
+    title: item.title ?? item.content ?? "",
+    summary: item.summary ?? item.content ?? "",
+    source: item.source ?? "",
+    url: item.url ?? "",
+    contentMd: item.content_md ?? item.content ?? "",
+    contentHtml: item.content_html ?? undefined,
+    publishedAt: item.published_at ?? undefined,
   }));
 
   const { data: galleryRows } = await supabase

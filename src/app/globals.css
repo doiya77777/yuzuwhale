@@ -26,6 +26,72 @@ body {
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
+.markdown {
+    color: #0f172a;
+    line-height: 1.8;
+}
+
+.markdown h2,
+.markdown h3 {
+    margin-top: 1.5rem;
+    font-weight: 800;
+    color: #172554;
+}
+
+.markdown p {
+    margin-top: 0.75rem;
+}
+
+.markdown ul,
+.markdown ol {
+    margin-top: 0.75rem;
+    padding-left: 1.25rem;
+}
+
+.markdown li {
+    margin-top: 0.25rem;
+}
+
+.markdown a {
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.markdown blockquote {
+    margin-top: 1rem;
+    border-left: 4px solid #1d4ed8;
+    padding-left: 1rem;
+    color: #1e3a8a;
+}
+
+.markdown code {
+    background: #e0f2fe;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.4rem;
+    font-weight: 600;
+}
+
+.markdown img {
+    max-width: 100%;
+    border-radius: 1rem;
+    border: 3px solid #172554;
+    margin-top: 1rem;
+}
+
+.markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.markdown th,
+.markdown td {
+    border: 2px solid #172554;
+    padding: 0.5rem;
+    text-align: left;
+}
+
 .hard-shadow {
     box-shadow: 4px 4px 0 0 var(--border);
 }

@@ -21,7 +21,45 @@ NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-If the env vars are missing, the app falls back to the local data in `src/data/site-config.ts`.
+If the env vars are missing, the app will show a setup message on the homepage.
+
+### Profile Fields
+
+`profile` supports:
+
+- `name`, `title`, `slogan`, `email`
+- `tags` (text array)
+- `socials` (json array: `{ platform, url }`)
+- `avatar_url` (optional)
+- `show_gallery` (boolean)
+
+## RSS News Sync
+
+We fetch real news from official AI blogs and write into Supabase.
+
+Set the server-side env vars:
+
+```bash
+SUPABASE_URL=your-project-url
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
+Run once:
+
+```bash
+npm run sync:news
+```
+
+This will pull latest RSS entries and store `title/summary/content` for the news list and detail page.
+
+### GitHub Actions (自动同步)
+
+Add repo secrets:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+The workflow `Sync News` runs every 6 hours and can be triggered manually.
 
 ## Deploy
 

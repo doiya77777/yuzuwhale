@@ -7,7 +7,9 @@ create table if not exists profile (
   slogan text not null,
   email text not null,
   tags text[] not null default '{}',
-  socials jsonb not null default '[]'::jsonb
+  socials jsonb not null default '[]'::jsonb,
+  avatar_url text,
+  show_gallery boolean not null default false
 );
 
 create table if not exists news (
@@ -34,3 +36,15 @@ alter table gallery enable row level security;
 create policy "Public read" on profile for select using (true);
 create policy "Public read" on news for select using (true);
 create policy "Public read" on gallery for select using (true);
+
+alter table news add column if not exists title text;
+alter table news add column if not exists summary text;
+alter table news add column if not exists source text;
+alter table news add column if not exists url text;
+alter table news add column if not exists content_md text;
+alter table news add column if not exists content_html text;
+alter table news add column if not exists published_at timestamptz;
+alter table news alter column content drop not null;
+alter table news alter column content set default '';
+
+create unique index if not exists news_url_key on news (url);
