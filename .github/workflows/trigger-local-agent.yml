@@ -1,0 +1,23 @@
+name: Trigger Local Agent
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call local webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.LOCAL_AGENT_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.LOCAL_AGENT_WEBHOOK_SECRET }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ] || [ -z "$WEBHOOK_SECRET" ]; then
+            echo "Missing webhook secrets" && exit 1
+          fi
+          curl -sS -X POST "$WEBHOOK_URL" \
+            -H "Authorization: Bearer $WEBHOOK_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"task":"daily_news"}'
