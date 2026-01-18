@@ -33,9 +33,26 @@ jobs:
           response="$(curl -sS -X POST "$WEBHOOK_URL" \
             -H "Authorization: Bearer $WEBHOOK_SECRET" \
             -H "Content-Type: application/json" \
-            -d '{"task":"daily_news"}')"
-          echo "$response"
-          printf "%s" "$response" > webhook-response.json
+            -d '{"task":"daily_news"}' \
+            -w '\n__HTTP_STATUS__:%{http_code}\n')"
+          status="$(printf '%s' "$response" | sed -n 's/.*__HTTP_STATUS__:\\([0-9][0-9][0-9]\\).*/\\1/p')"
+          body="$(printf '%s' "$response" | sed 's/__HTTP_STATUS__:[0-9][0-9][0-9]//g')"
+          printf "%s" "$body" > webhook-response.json
+          echo "$body"
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          raw = Path("webhook-response.json").read_text(encoding="utf-8").strip()
+          try:
+            data = json.loads(raw or "{}")
+          except Exception as e:
+            raise SystemExit(f"Webhook did not return JSON. body={raw[:2000]}")
+
+          if data.get("ok") is not True:
+            raise SystemExit(f"Webhook ok!=true. data={data}")
+          PY
 
       - name: Notify Feishu (optional)
         env:
