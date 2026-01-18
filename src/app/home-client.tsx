@@ -19,6 +19,7 @@ const btnStyle =
 
 type HomeClientProps = {
   data: SiteConfig;
+  dailySummary?: string | null;
 };
 
 function formatDateLabel(value?: string) {
@@ -39,7 +40,7 @@ function getNewsLabel(item: SiteConfig["news"][number]) {
   return item.date || formatDateLabel(item.publishedAt);
 }
 
-export function HomeClient({ data }: HomeClientProps) {
+export function HomeClient({ data, dailySummary }: HomeClientProps) {
   const [activeId, setActiveId] = useState<number | null>(null);
   const activeItem = data.gallery.find((item) => item.id === activeId);
   const showGallery =
@@ -72,6 +73,7 @@ export function HomeClient({ data }: HomeClientProps) {
               width={28}
               height={28}
               className="h-7 w-7 rounded-full border-2 border-[#172554]"
+              priority
             />
           ) : (
             <Image
@@ -107,8 +109,8 @@ export function HomeClient({ data }: HomeClientProps) {
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-24 sm:px-6">
-        <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="space-y-6">
+        <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="space-y-6 self-center">
             <div className="space-y-4">
               <p className="text-sm font-semibold tracking-[0.3em] text-[#172554]">
                 {data.profile.title}
@@ -144,38 +146,38 @@ export function HomeClient({ data }: HomeClientProps) {
           </div>
 
           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
               <div className="rounded-2xl border-4 border-[#172554] bg-[#FDE047] p-2 hard-shadow">
-                <Image
-                  src="/yuzu.svg"
-                  alt="Yuzu Whale"
-                  width={44}
-                  height={44}
-                  className="h-11 w-11"
-                  priority
-                />
+                <span className="text-xl">🤖</span>
               </div>
               <div>
-                <p className="text-sm font-bold text-[#172554]">本周 Focus</p>
+                <p className="text-sm font-bold text-[#172554]">Daily Focus</p>
                 <p className="text-lg font-black text-[#172554]">
-                  AI 资讯 + 视觉趋势
+                  AI 每日简报
                 </p>
               </div>
             </div>
-            <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
-              <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#E0F2FE] px-4 py-3">
-                <span>更新频率</span>
-                <span>每日</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#FEF3C7] px-4 py-3">
-                <span>内容类型</span>
-                <span>资讯 / Prompt</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-white px-4 py-3">
-                <span>合作邮箱</span>
-                <span>{data.profile.email || "-"}</span>
-              </div>
-            </div>
+            
+            {dailySummary ? (
+               <div className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4 text-sm font-semibold text-[#1e3a8a] leading-relaxed whitespace-pre-wrap">
+                  {dailySummary}
+               </div>
+            ) : (
+               <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#E0F2FE] px-4 py-3">
+                    <span>更新频率</span>
+                    <span>每日</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#FEF3C7] px-4 py-3">
+                    <span>内容类型</span>
+                    <span>资讯 / Prompt</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-white px-4 py-3">
+                    <span>合作邮箱</span>
+                    <span>{data.profile.email || "-"}</span>
+                  </div>
+               </div>
+            )}
           </div>
         </section>
 

@@ -1,10 +1,10 @@
+import { NewsNav } from "./news-nav";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
-import { ChevronLeft } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 300;
@@ -75,19 +75,8 @@ export default async function NewsDetail({
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] px-4 pb-24 pt-4 text-[#172554]">
       
-      {/* Improved Sticky Navigation for Mobile */}
-      <nav className="sticky top-4 z-50 mx-auto flex w-full max-w-3xl items-center gap-4 rounded-full border-4 border-[#172554] bg-white/90 px-4 py-3 backdrop-blur hard-shadow mb-6">
-        <Link
-          href="/"
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-[#172554] text-white transition-transform active:scale-95"
-          aria-label="Back to Home"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Link>
-        <div className="flex-1 truncate font-bold text-[#172554]">
-           {item.title}
-        </div>
-      </nav>
+      {/* Client Component for Navigation */}
+      <NewsNav title={item.title} />
 
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <article className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">

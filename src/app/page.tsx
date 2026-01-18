@@ -1,5 +1,6 @@
 import { HomeClient } from "@/app/home-client";
 import { fetchSiteConfig } from "@/lib/supabase/data";
+import { getCachedDailySummary } from "@/lib/ai-summary";
 
 export const revalidate = 300;
 
@@ -19,5 +20,9 @@ export default async function Home() {
     );
   }
 
-  return <HomeClient data={supabaseConfig} />;
+  // Try to fetch AI summary in parallel (or just await it since it's cached)
+  // We use the top 10 news items for the summary context
+  const summary = await getCachedDailySummary(supabaseConfig.news);
+
+  return <HomeClient data={supabaseConfig} dailySummary={summary} />;
 }
