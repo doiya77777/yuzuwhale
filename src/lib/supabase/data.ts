@@ -24,19 +24,31 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
     return null;
   }
 
-  const profile: Profile = {
-    name: profileRow.name ?? "",
-    title: profileRow.title ?? "",
-    slogan: profileRow.slogan ?? "",
-    email: profileRow.email ?? "",
-    tags: Array.isArray(profileRow.tags) ? profileRow.tags : [],
-    socials: Array.isArray(profileRow.socials)
-      ? (profileRow.socials as SocialLink[])
-      : [],
-    avatarUrl: profileRow.avatar_url ?? "",
-    showGallery: profileRow.show_gallery ?? false,
-  };
-
+      const socials = (profileRow.socials as SocialLink[]) || [];
+      
+      // Patch: Ensure X link is correct and filter out empty ones
+      const updatedSocials = socials.map(s => {
+        if (s.platform.toLowerCase() === 'twitter' || s.platform.toLowerCase() === 'x') {
+          return { ...s, url: 'https://x.com/yuzuwvle' };
+        }
+        return s;
+      }).filter(s => s.url && s.url !== '#' && !s.url.includes('example.com'));
+  
+      // If no Twitter/X exists, add it (optional, based on request)
+      if (!updatedSocials.find(s => s.platform.toLowerCase() === 'twitter' || s.platform.toLowerCase() === 'x')) {
+         updatedSocials.push({ platform: 'Twitter', url: 'https://x.com/yuzuwvle' });
+      }
+  
+      const profile: Profile = {
+        name: profileRow.name ?? "",
+        title: profileRow.title ?? "",
+        slogan: profileRow.slogan ?? "",
+        email: profileRow.email ?? "",
+        tags: Array.isArray(profileRow.tags) ? profileRow.tags : [],
+        socials: updatedSocials,
+        avatarUrl: profileRow.avatar_url ?? "",
+        showGallery: profileRow.show_gallery ?? false,
+      };
   const { data: newsRows } = await supabase
     .from("news")
     .select(
