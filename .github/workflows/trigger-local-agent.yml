@@ -8,7 +8,19 @@ on:
 jobs:
   trigger:
     runs-on: ubuntu-latest
+    # Required when secrets are configured as Environment secrets in GitHub.
+    # Ensure the environment name matches the one you configured (default: production).
+    environment: production
     steps:
+      - name: Debug secrets presence (safe)
+        env:
+          WEBHOOK_URL: ${{ secrets.LOCAL_AGENT_WEBHOOK_URL }}
+          WEBHOOK_SECRET: ${{ secrets.LOCAL_AGENT_WEBHOOK_SECRET }}
+        run: |
+          echo "WEBHOOK_URL set? $([ -n "$WEBHOOK_URL" ] && echo yes || echo no)"
+          echo "WEBHOOK_SECRET set? $([ -n "$WEBHOOK_SECRET" ] && echo yes || echo no)"
+          echo "WEBHOOK_URL length: $(printf %s "$WEBHOOK_URL" | wc -c | tr -d ' ')"
+          echo "WEBHOOK_SECRET length: $(printf %s "$WEBHOOK_SECRET" | wc -c | tr -d ' ')"
       - name: Call local webhook
         env:
           WEBHOOK_URL: ${{ secrets.LOCAL_AGENT_WEBHOOK_URL }}
