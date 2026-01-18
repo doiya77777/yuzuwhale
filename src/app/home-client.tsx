@@ -4,14 +4,28 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Github, Globe, Sparkles, Twitter } from "lucide-react";
+import { Github, Globe, Sparkles } from "lucide-react";
 import type { SiteConfig } from "@/data/site-config";
 import { cn } from "@/lib/utils";
 import { PopMarkdown } from "@/components/pop-markdown";
 
+// Custom X Icon (SVG)
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="currentColor" 
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 const socials = {
-  Twitter: Twitter,
-  GitHub: Github,
+  Twitter: XIcon,
+  GitHub: Github, // Kept in map but will filter out key
   Xiaohongshu: Sparkles,
 };
 
@@ -46,6 +60,12 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
   const activeItem = data.gallery.find((item) => item.id === activeId);
   const showGallery =
     (data.profile.showGallery ?? false) && data.gallery.length > 0;
+  
+  // Filter out GitHub from socials and ensure Twitter uses XIcon
+  const displaySocials = useMemo(() => {
+    return data.profile.socials.filter(s => s.platform !== 'GitHub');
+  }, [data.profile.socials]);
+
   const groupedNews = useMemo(() => {
     const groups = new Map<
       string,
@@ -91,7 +111,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {data.profile.socials.map((social) => {
+          {displaySocials.map((social) => {
             const Icon =
               socials[social.platform as keyof typeof socials] ?? Globe;
             return (

@@ -1,11 +1,8 @@
 import { NewsNav } from "./news-nav";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { PopMarkdown } from "@/components/pop-markdown";
 
 export const revalidate = 300;
 
@@ -72,6 +69,9 @@ export default async function NewsDetail({
     notFound();
   }
 
+  // Prioritize HTML content if available, but PopMarkdown now handles both via rehype-raw
+  const content = item.contentHtml || item.contentMd || item.summary || "暂无详情内容。";
+
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] px-4 pb-24 pt-4 text-[#172554]">
       
@@ -114,16 +114,8 @@ export default async function NewsDetail({
             ) : null}
           </div>
 
-          <div className="markdown mt-6">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw, rehypeSanitize]}
-            >
-              {item.contentMd ||
-                item.contentHtml ||
-                item.summary ||
-                "暂无详情内容。"}
-            </ReactMarkdown>
+          <div className="mt-6">
+            <PopMarkdown content={content} />
           </div>
         </article>
       </div>
