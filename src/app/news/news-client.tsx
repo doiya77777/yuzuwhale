@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Search, Filter, X, Calendar, ChevronDown } from "lucide-react";
 
 type NewsListItem = {
   id: number;
@@ -58,6 +59,7 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
   const [sourceFilter, setSourceFilter] = useState("all");
   const [rangeFilter, setRangeFilter] = useState("7d");
   const [dateFilter, setDateFilter] = useState(initialDate || "");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     setDateFilter(initialDate || "");
@@ -138,106 +140,106 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
 
   return (
     <div className="space-y-6">
-      <div className="sticky top-4 z-10 rounded-3xl border-4 border-[#172554] bg-white/95 p-4 backdrop-blur hard-shadow">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-2 md:w-[220px]">
-            <span className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
-              日期
-            </span>
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  setDateFilter(next);
-                  setRangeFilter("all");
-                  updateDateParam(next);
-                }}
-                className="min-w-[180px] flex-1 rounded-2xl border-2 border-[#172554] px-3 py-2 text-sm font-semibold text-[#172554] focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setDateFilter("");
-                  updateDateParam("");
-                }}
-                className="rounded-full border-2 border-[#172554] bg-white px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
-              >
-                清除
-              </button>
-              {dateFilter ? (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const url = `${window.location.origin}/news?date=${dateFilter}`;
-                    try {
-                      await navigator.clipboard.writeText(url);
-                    } catch {
-                      window.prompt("复制当日链接", url);
-                    }
-                  }}
-                  className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
+      {/* Refactored Filter Bar: Compact & Collapsible */}
+      <div className="sticky top-4 z-20 rounded-3xl border-4 border-[#172554] bg-white p-3 hard-shadow transition-all">
+        <div className="flex items-center gap-2">
+           {/* Search Input - Always Visible */}
+           <div className="relative flex-1">
+             <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#172554]/50" />
+             <input
+               value={keyword}
+               onChange={(event) => setKeyword(event.target.value)}
+               placeholder="搜索资讯..."
+               className="w-full rounded-xl border-2 border-[#172554] bg-[#F8FAFC] py-2 pl-10 pr-4 text-sm font-bold text-[#172554] placeholder:text-[#172554]/40 focus:bg-white focus:outline-none"
+             />
+             {keyword && (
+                <button 
+                  onClick={() => setKeyword("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#172554] hover:bg-gray-100 rounded-full p-1"
                 >
-                  复制链接
+                  <X className="h-4 w-4" />
                 </button>
-              ) : null}
+             )}
+           </div>
+
+           {/* Mobile Filter Toggle */}
+           <button 
+             onClick={() => setIsFilterOpen(!isFilterOpen)}
+             className={`flex h-10 w-10 items-center justify-center rounded-xl border-2 border-[#172554] transition-all md:hidden ${isFilterOpen ? 'bg-[#FDE047] shadow-none translate-y-[2px] translate-x-[2px]' : 'bg-white shadow-[2px_2px_0_0_#172554] active:shadow-none active:translate-y-[2px] active:translate-x-[2px]'}`}
+           >
+             <Filter className="h-5 w-5 text-[#172554]" />
+           </button>
+        </div>
+
+        {/* Filters Area - Collapsible on Mobile, Flex on Desktop */}
+        <div className={`${isFilterOpen ? 'flex' : 'hidden'} mt-3 flex-col gap-3 border-t-2 border-dashed border-[#172554]/20 pt-3 md:flex md:flex-row md:items-center md:border-none md:pt-0`}>
+           
+           {/* Quick Range Chips */}
+           <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black text-[#172554] md:hidden">时间范围</span>
+              {["7d", "30d", "all"].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => {
+                      setRangeFilter(r);
+                      setDateFilter(""); 
+                      updateDateParam("");
+                  }}
+                  disabled={Boolean(dateFilter)}
+                  className={`rounded-lg border-2 border-[#172554] px-3 py-1 text-xs font-bold transition-all ${
+                      rangeFilter === r && !dateFilter
+                          ? "bg-[#172554] text-white" 
+                          : "bg-white text-[#172554] hover:bg-[#E0F2FE] disabled:opacity-50"
+                  }`}
+                >
+                  {r === "7d" ? "最近7天" : r === "30d" ? "最近30天" : "全部"}
+                </button>
+              ))}
+           </div>
+
+           <div className="hidden h-6 w-0.5 bg-[#172554]/20 md:block mx-1" />
+
+           {/* Source Selector */}
+           <div className="flex items-center gap-2">
+             <span className="text-xs font-black text-[#172554] md:hidden">来源</span>
+             <div className="relative w-full md:w-auto">
+               <select
+                 value={sourceFilter}
+                 onChange={(event) => setSourceFilter(event.target.value)}
+                 className="w-full appearance-none rounded-lg border-2 border-[#172554] bg-white py-1.5 pl-3 pr-8 text-xs font-bold text-[#172554] focus:outline-none md:w-auto"
+               >
+                 <option value="all">全部来源</option>
+                 {sources.map((source) => (
+                   <option key={source} value={source}>{source}</option>
+                 ))}
+               </select>
+               <ChevronDown className="absolute right-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[#172554] pointer-events-none" />
+             </div>
+           </div>
+
+            {/* Date Picker */}
+            <div className="flex items-center gap-2 md:ml-auto">
+               <div className="flex items-center gap-2 rounded-lg border-2 border-[#172554] bg-white px-2 py-1">
+                  <Calendar className="h-3.5 w-3.5 text-[#172554]" />
+                  <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(event) => {
+                        const next = event.target.value;
+                        setDateFilter(next);
+                        setRangeFilter("all");
+                        updateDateParam(next);
+                    }}
+                    className="bg-transparent text-xs font-bold text-[#172554] outline-none"
+                  />
+                  {dateFilter && (
+                    <button onClick={() => { setDateFilter(""); updateDateParam(""); }}>
+                      <X className="h-3.5 w-3.5 text-[#172554] hover:text-red-500" />
+                    </button>
+                  )}
+               </div>
             </div>
-          </div>
-          <div className="flex flex-1 flex-col gap-2">
-            <label className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
-              搜索
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              <input
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-                placeholder="按标题 / 摘要 / 来源检索"
-                className="min-w-[220px] flex-1 rounded-2xl border-2 border-[#172554] px-4 py-2 text-sm font-semibold text-[#172554] placeholder:text-[#1e3a8a]/60 focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setKeyword("")}
-                className="rounded-full border-2 border-[#172554] bg-white px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
-              >
-                清空
-              </button>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2 md:flex-row md:items-end">
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
-                来源
-              </span>
-              <select
-                value={sourceFilter}
-                onChange={(event) => setSourceFilter(event.target.value)}
-                className="rounded-2xl border-2 border-[#172554] px-3 py-2 text-sm font-semibold text-[#172554] focus:outline-none"
-              >
-                <option value="all">全部来源</option>
-                {sources.map((source) => (
-                  <option key={source} value={source}>
-                    {source}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
-                时间
-              </span>
-              <select
-                value={rangeFilter}
-                onChange={(event) => setRangeFilter(event.target.value)}
-                disabled={Boolean(dateFilter)}
-                className="rounded-2xl border-2 border-[#172554] px-3 py-2 text-sm font-semibold text-[#172554] focus:outline-none"
-              >
-                <option value="7d">最近 7 天</option>
-                <option value="30d">最近 30 天</option>
-                <option value="all">全部时间</option>
-              </select>
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -257,7 +259,7 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
                   共 {groupItems.length} 条
                 </span>
               </div>
-              <span className="rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold text-[#172554] hard-shadow">
+              <span className="rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold text-[#172554] hard-shadow transition-transform active:translate-y-1 active:translate-x-1 active:shadow-none">
                 <span className="group-open:hidden">展开</span>
                 <span className="hidden group-open:inline">收起</span>
               </span>
@@ -285,7 +287,7 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
                     <span>{getDateLabel(item)}</span>
                     <Link
                       href={`/news/${item.id}`}
-                      className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold"
+                      className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold hover:bg-[#fde047]/80"
                     >
                       阅读详情 →
                     </Link>
