@@ -26,10 +26,71 @@ jobs:
           WEBHOOK_URL: ${{ secrets.LOCAL_AGENT_WEBHOOK_URL }}
           WEBHOOK_SECRET: ${{ secrets.LOCAL_AGENT_WEBHOOK_SECRET }}
         run: |
+          set -euo pipefail
           if [ -z "$WEBHOOK_URL" ] || [ -z "$WEBHOOK_SECRET" ]; then
             echo "Missing webhook secrets" && exit 1
           fi
-          curl -sS -X POST "$WEBHOOK_URL" \
+          response="$(curl -sS -X POST "$WEBHOOK_URL" \
             -H "Authorization: Bearer $WEBHOOK_SECRET" \
             -H "Content-Type: application/json" \
-            -d '{"task":"daily_news"}'
+            -d '{"task":"daily_news"}')"
+          echo "$response"
+          printf "%s" "$response" > webhook-response.json
+
+      - name: Notify Feishu (optional)
+        env:
+          FEISHU_BOT_WEBHOOK_URL: ${{ secrets.FEISHU_BOT_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "$FEISHU_BOT_WEBHOOK_URL" ]; then
+            echo "FEISHU_BOT_WEBHOOK_URL not set; skipping."
+            exit 0
+          fi
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("webhook-response.json").read_text(encoding="utf-8") or "{}")
+          ok = data.get("ok")
+          date = data.get("date") or ""
+          doc = data.get("feishu_doc_url") or ""
+          site = data.get("site_news_url") or ""
+
+          lines = []
+          lines.append(f"Yuzu Daily 运行结果：{'✅ OK' if ok else '❌ FAILED'}")
+          if date:
+            lines.append(f"日期：{date}")
+          if doc:
+            lines.append(f"飞书文档：{doc}")
+          else:
+            lines.append("飞书文档：未生成（检查 FEISHU_APP_ID/FEISHU_APP_SECRET/FEISHU_FOLDER_TOKEN）")
+          if site:
+            lines.append(f"站点链接：{site}")
+          print("\n".join(lines))
+          Path("feishu-message.txt").write_text("\n".join(lines), encoding="utf-8")
+          PY
+
+          msg="$(cat feishu-message.txt)"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          msg = Path("feishu-message.txt").read_text(encoding="utf-8")
+          payload = {"msg_type": "text", "content": {"text": msg}}
+          Path("feishu-payload.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+          PY
+
+          curl -sS -X POST "$FEISHU_BOT_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d @feishu-payload.json
+
+      - name: Upload run artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yuzu-daily-run
+          path: |
+            webhook-response.json
+            feishu-message.txt
+            feishu-payload.json

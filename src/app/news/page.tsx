@@ -4,7 +4,22 @@ import { NewsClient } from "@/app/news/news-client";
 
 export const revalidate = 300;
 
-export default async function NewsPage() {
+function normalizeDateParam(value: string | string[] | undefined) {
+  if (!value) return "";
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return "";
+  return trimmed;
+}
+
+export default async function NewsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = (await searchParams) ?? {};
+  const dateFilter = normalizeDateParam(params.date);
   const supabase = createSupabaseServerClient();
 
   if (!supabase) {
@@ -26,9 +41,15 @@ export default async function NewsPage() {
     );
   }
 
-  const { data: newsItems } = await supabase
+  let query = supabase
     .from("news")
-    .select("id,title,summary,source,url,emoji,date,published_at")
+    .select("id,title,summary,source,url,emoji,date,published_at");
+
+  if (dateFilter) {
+    query = query.eq("date", dateFilter);
+  }
+
+  const { data: newsItems } = await query
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("id", { ascending: false });
 
@@ -51,6 +72,11 @@ export default async function NewsPage() {
           <div>
             <p className="text-sm font-semibold tracking-[0.3em]">AI NEWS</p>
             <h1 className="text-3xl font-black">资讯汇总</h1>
+            {dateFilter ? (
+              <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">
+                当前日期筛选：{dateFilter}
+              </p>
+            ) : null}
           </div>
           <Link
             href="/"
@@ -60,7 +86,7 @@ export default async function NewsPage() {
           </Link>
         </div>
 
-        <NewsClient items={items} />
+        <NewsClient items={items} initialDate={dateFilter} />
       </div>
     </div>
   );

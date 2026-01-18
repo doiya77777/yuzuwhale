@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 type NewsListItem = {
   id: number;
@@ -15,6 +16,7 @@ type NewsListItem = {
 };
 
 type NewsClientProps = {
+  initialDate?: string;
   items: NewsListItem[];
 };
 
@@ -48,10 +50,32 @@ function getDateValue(item: NewsListItem) {
   return parsed;
 }
 
-export function NewsClient({ items }: NewsClientProps) {
+export function NewsClient({ items, initialDate }: NewsClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [keyword, setKeyword] = useState("");
   const [sourceFilter, setSourceFilter] = useState("all");
   const [rangeFilter, setRangeFilter] = useState("7d");
+  const [dateFilter, setDateFilter] = useState(initialDate || "");
+
+  useEffect(() => {
+    setDateFilter(initialDate || "");
+    if (initialDate) {
+      setRangeFilter("all");
+    }
+  }, [initialDate]);
+
+  function updateDateParam(nextDate: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextDate) {
+      params.set("date", nextDate);
+    } else {
+      params.delete("date");
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  }
 
   const sources = useMemo(() => {
     const unique = new Set<string>();
@@ -70,6 +94,10 @@ export function NewsClient({ items }: NewsClientProps) {
     const lowerKeyword = keyword.trim().toLowerCase();
 
     return items.filter((item) => {
+      if (dateFilter) {
+        return item.date === dateFilter;
+      }
+
       if (sourceFilter !== "all" && item.source !== sourceFilter) {
         return false;
       }
@@ -94,7 +122,7 @@ export function NewsClient({ items }: NewsClientProps) {
         .toLowerCase();
       return haystack.includes(lowerKeyword);
     });
-  }, [items, keyword, rangeFilter, sourceFilter]);
+  }, [dateFilter, items, keyword, rangeFilter, sourceFilter]);
 
   const grouped = useMemo(() => {
     const groups = new Map<string, NewsListItem[]>();
@@ -110,8 +138,52 @@ export function NewsClient({ items }: NewsClientProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border-4 border-[#172554] bg-white p-4 hard-shadow">
+      <div className="sticky top-4 z-10 rounded-3xl border-4 border-[#172554] bg-white/95 p-4 backdrop-blur hard-shadow">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 md:w-[220px]">
+            <span className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
+              日期
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(event) => {
+                  const next = event.target.value;
+                  setDateFilter(next);
+                  setRangeFilter("all");
+                  updateDateParam(next);
+                }}
+                className="min-w-[180px] flex-1 rounded-2xl border-2 border-[#172554] px-3 py-2 text-sm font-semibold text-[#172554] focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setDateFilter("");
+                  updateDateParam("");
+                }}
+                className="rounded-full border-2 border-[#172554] bg-white px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
+              >
+                清除
+              </button>
+              {dateFilter ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const url = `${window.location.origin}/news?date=${dateFilter}`;
+                    try {
+                      await navigator.clipboard.writeText(url);
+                    } catch {
+                      window.prompt("复制当日链接", url);
+                    }
+                  }}
+                  className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
+                >
+                  复制链接
+                </button>
+              ) : null}
+            </div>
+          </div>
           <div className="flex flex-1 flex-col gap-2">
             <label className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
               搜索
@@ -157,6 +229,7 @@ export function NewsClient({ items }: NewsClientProps) {
               <select
                 value={rangeFilter}
                 onChange={(event) => setRangeFilter(event.target.value)}
+                disabled={Boolean(dateFilter)}
                 className="rounded-2xl border-2 border-[#172554] px-3 py-2 text-sm font-semibold text-[#172554] focus:outline-none"
               >
                 <option value="7d">最近 7 天</option>
