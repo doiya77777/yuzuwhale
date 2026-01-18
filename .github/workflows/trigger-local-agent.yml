@@ -7,7 +7,7 @@ on:
 
 jobs:
   trigger:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, yuzu-agent]
     # Required when secrets are configured as Environment secrets in GitHub.
     # Ensure the environment name matches the one you configured (case-sensitive).
     environment: Production
