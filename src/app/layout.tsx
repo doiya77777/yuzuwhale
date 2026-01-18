@@ -17,6 +17,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: "Yuzu Whale AI Playground",
   description: "Yuzu Whale 的高能波普 AI 创作基地。",
+  icons: {
+    icon: [{ url: "/yuzu.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${bungee.variable} ${spaceGrotesk.variable} antialiased`}>
+      <body
+        className={`${bungee.variable} ${spaceGrotesk.variable} antialiased`}
+      >
         {children}
       </body>
     </html>

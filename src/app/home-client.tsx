@@ -103,7 +103,14 @@ export function HomeClient({ data }: HomeClientProps) {
               className="h-7 w-7 rounded-full border-2 border-[#172554]"
             />
           ) : (
-            <span className="text-xl">🐳</span>
+            <Image
+              src="/yuzu.svg"
+              alt="Yuzu Whale icon"
+              width={28}
+              height={28}
+              className="h-7 w-7"
+              priority
+            />
           )}
           <span className="font-black tracking-wide">
             {data.profile.name || "YUZU.AI"}

@@ -6,6 +6,9 @@
     --accent: #ffffff;
     --text: #0f172a;
     --border: #172554;
+    --yuzu-ink: #172554;
+    --yuzu-yellow: #fde047;
+    --yuzu-sky: #e0f2fe;
 }
 
 @theme inline {
@@ -94,6 +97,11 @@ body {
 
 .hard-shadow {
     box-shadow: 4px 4px 0 0 var(--border);
+}
+
+.yuzu-panel {
+    border-color: var(--yuzu-ink);
+    box-shadow: 4px 4px 0 0 var(--yuzu-ink);
 }
 
 @keyframes floaty {
