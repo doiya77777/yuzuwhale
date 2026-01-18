@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Github, Globe, Sparkles, Twitter } from "lucide-react";
 import type { SiteConfig } from "@/data/site-config";
 import { cn } from "@/lib/utils";
+import { PopMarkdown } from "@/components/pop-markdown";
 
 const socials = {
   Twitter: Twitter,
@@ -147,20 +148,23 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
 
           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">
             <div className="flex items-center gap-3 mb-4">
-              <div className="rounded-2xl border-4 border-[#172554] bg-[#FDE047] p-2 hard-shadow">
+              <div className="flex items-center justify-center h-10 w-10 rounded-2xl border-4 border-[#172554] bg-[#FDE047] hard-shadow">
                 <span className="text-xl">🤖</span>
               </div>
               <div>
-                <p className="text-sm font-bold text-[#172554]">Daily Focus</p>
-                <p className="text-lg font-black text-[#172554]">
+                <p className="text-sm font-bold text-[#172554] leading-none">Daily Focus</p>
+                <p className="text-lg font-black text-[#172554] leading-tight">
                   AI 每日简报
                 </p>
               </div>
             </div>
             
             {dailySummary ? (
-               <div className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4 text-sm font-semibold text-[#1e3a8a] leading-relaxed whitespace-pre-wrap">
-                  {dailySummary}
+               <div className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
+                    <Sparkles className="h-12 w-12 text-[#172554]" />
+                  </div>
+                  <PopMarkdown content={dailySummary} />
                </div>
             ) : (
                <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
