@@ -88,12 +88,7 @@ export function NewsClient({ items }: NewsClientProps) {
       if (!lowerKeyword) {
         return true;
       }
-      const haystack = [
-        item.title,
-        item.summary,
-        item.source,
-        item.url,
-      ]
+      const haystack = [item.title, item.summary, item.source, item.url]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -121,12 +116,21 @@ export function NewsClient({ items }: NewsClientProps) {
             <label className="text-xs font-semibold tracking-[0.2em] text-[#172554]">
               搜索
             </label>
-            <input
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              placeholder="按标题 / 摘要 / 来源检索"
-              className="rounded-2xl border-2 border-[#172554] px-4 py-2 text-sm font-semibold text-[#172554] placeholder:text-[#1e3a8a]/60 focus:outline-none"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="按标题 / 摘要 / 来源检索"
+                className="min-w-[220px] flex-1 rounded-2xl border-2 border-[#172554] px-4 py-2 text-sm font-semibold text-[#172554] placeholder:text-[#1e3a8a]/60 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setKeyword("")}
+                className="rounded-full border-2 border-[#172554] bg-white px-3 py-2 text-xs font-bold text-[#172554] hard-shadow"
+              >
+                清空
+              </button>
+            </div>
           </div>
           <div className="flex flex-col gap-2 md:flex-row md:items-end">
             <div className="flex flex-col gap-2">
@@ -165,19 +169,26 @@ export function NewsClient({ items }: NewsClientProps) {
       </div>
 
       {grouped.length ? (
-        grouped.map(([label, groupItems]) => (
-          <div
+        grouped.map(([label, groupItems], index) => (
+          <details
             key={label}
-            className="rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow"
+            open={index < 2}
+            className="group rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="rounded-full bg-[#1D4ED8] px-3 py-1 text-xs font-bold text-white">
-                {label}
+            <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-[#1D4ED8] px-3 py-1 text-xs font-bold text-white">
+                  {label}
+                </span>
+                <span className="text-xs font-semibold text-[#172554]">
+                  共 {groupItems.length} 条
+                </span>
+              </div>
+              <span className="rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold text-[#172554] hard-shadow">
+                <span className="group-open:hidden">展开</span>
+                <span className="hidden group-open:inline">收起</span>
               </span>
-              <span className="text-xs font-semibold text-[#172554]">
-                共 {groupItems.length} 条
-              </span>
-            </div>
+            </summary>
 
             <div className="mt-4 space-y-4">
               {groupItems.map((item) => (
@@ -219,7 +230,7 @@ export function NewsClient({ items }: NewsClientProps) {
                 </div>
               ))}
             </div>
-          </div>
+          </details>
         ))
       ) : (
         <div className="rounded-3xl border-4 border-[#172554] bg-white p-5 text-sm font-semibold text-[#1e3a8a] hard-shadow">

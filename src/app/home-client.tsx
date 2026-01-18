@@ -59,38 +59,9 @@ export function HomeClient({ data }: HomeClientProps) {
     return Array.from(groups.values()).slice(0, 3);
   }, [data.news]);
 
-  const bubbles = useMemo(
-    () =>
-      Array.from({ length: 8 }, (_, index) => ({
-        id: index,
-        size: 40 + index * 8,
-        left: `${10 + index * 10}%`,
-        duration: 12 + index * 2,
-        delay: index * 1.2,
-      })),
-    [],
-  );
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)]">
-      {bubbles.map((bubble) => (
-        <motion.div
-          key={bubble.id}
-          className="pointer-events-none absolute bottom-0 rounded-full border-4 border-[#1D4ED8]/40 bg-white/30"
-          style={{
-            width: bubble.size,
-            height: bubble.size,
-            left: bubble.left,
-          }}
-          animate={{ y: [0, -900] }}
-          transition={{
-            duration: bubble.duration,
-            delay: bubble.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
+      <div className="pointer-events-none absolute inset-0 yuzu-bg opacity-60" />
 
       <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-4 pb-6 pt-10 sm:px-6">
         <div className="flex items-center gap-3 rounded-full border-4 border-[#172554] bg-white px-4 py-2 text-[#172554] hard-shadow">
@@ -136,7 +107,7 @@ export function HomeClient({ data }: HomeClientProps) {
       </header>
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-24 sm:px-6">
-        <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="space-y-6">
             <div className="space-y-4">
               <p className="text-sm font-semibold tracking-[0.3em] text-[#172554]">
@@ -160,19 +131,29 @@ export function HomeClient({ data }: HomeClientProps) {
               ))}
             </div>
             <div className="flex flex-wrap gap-4">
-              <button type="button" className={btnStyle}>
-                查看我的大脑 🧠
-              </button>
-              <span className="rounded-full border-2 border-[#172554] bg-[#1D4ED8] px-4 py-3 text-sm font-bold text-white hard-shadow">
-                AI Creator
+              <Link
+                href="/news"
+                className={`${btnStyle} inline-flex items-center justify-center rounded-full`}
+              >
+                今日资讯 →
+              </Link>
+              <span className="rounded-full border-2 border-[#172554] bg-white px-4 py-3 text-sm font-bold text-[#172554] hard-shadow">
+                更新频率：每日
               </span>
             </div>
           </div>
 
           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl border-4 border-[#172554] bg-[#FDE047] px-3 py-2 text-2xl">
-                🐳
+              <div className="rounded-2xl border-4 border-[#172554] bg-[#FDE047] p-2 hard-shadow">
+                <Image
+                  src="/yuzu.svg"
+                  alt="Yuzu Whale"
+                  width={44}
+                  height={44}
+                  className="h-11 w-11"
+                  priority
+                />
               </div>
               <div>
                 <p className="text-sm font-bold text-[#172554]">本周 Focus</p>

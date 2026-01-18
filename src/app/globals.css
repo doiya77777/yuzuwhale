@@ -9,6 +9,9 @@
     --yuzu-ink: #172554;
     --yuzu-yellow: #fde047;
     --yuzu-sky: #e0f2fe;
+    --yuzu-paper: #ffffff;
+    --yuzu-wash: #f8fafc;
+    --yuzu-shadow: rgba(23, 37, 84, 0.12);
 }
 
 @theme inline {
@@ -24,9 +27,16 @@
 }
 
 body {
-    background: var(--primary);
+    background: linear-gradient(135deg, #fef9c3 0%, #e0f2fe 100%);
     color: var(--text);
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.yuzu-bg {
+    background-image: url("/doodle-bg.svg");
+    background-size: 240px 240px;
+    background-repeat: repeat;
+    background-position: center;
 }
 
 .markdown {
