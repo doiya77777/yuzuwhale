@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Github, Globe, Loader2, Sparkles } from "lucide-react";
+import { Github, Globe, Loader2, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import type { SiteConfig } from "@/data/site-config";
 import { cn } from "@/lib/utils";
 import { PopMarkdown } from "@/components/pop-markdown";
@@ -67,6 +67,45 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
   const [openNewsId, setOpenNewsId] = useState<number | null>(null);
   const [loadingNewsId, setLoadingNewsId] = useState<number | null>(null);
   const openNewsIdRef = useRef<number | null>(null);
+
+  // Gallery Navigation Logic
+  const activeGalleryIndex = useMemo(() => 
+    activeId ? data.gallery.findIndex((item) => item.id === activeId) : -1,
+  [activeId, data.gallery]);
+
+  const hasPrev = activeGalleryIndex > 0;
+  const hasNext = activeGalleryIndex < data.gallery.length - 1;
+
+  const handlePrevGallery = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (hasPrev) {
+      setActiveId(data.gallery[activeGalleryIndex - 1].id);
+    }
+  }, [hasPrev, activeGalleryIndex, data.gallery]);
+
+  const handleNextGallery = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (hasNext) {
+      setActiveId(data.gallery[activeGalleryIndex + 1].id);
+    }
+  }, [hasNext, activeGalleryIndex, data.gallery]);
+
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    if (!activeId) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+             handleNextGallery();
+        } else if (e.key === 'ArrowLeft') {
+             handlePrevGallery();
+        } else if (e.key === 'Escape') {
+            setActiveId(null);
+        }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeId, handleNextGallery, handlePrevGallery]);
+
 
   // Filter out GitHub from socials and ensure Twitter uses XIcon
   const displaySocials = useMemo(() => {
@@ -140,7 +179,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
               priority
             />
           )}
-          <span className="font-black tracking-wide">
+          <span className="font-black tracking-wide hidden sm:inline">
             {data.profile.name || "YUZU.AI"}
           </span>
         </div>
@@ -218,7 +257,9 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                   <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
                     <Sparkles className="h-12 w-12 text-[#172554]" />
                   </div>
-                  <PopMarkdown content={dailySummary} />
+                  <div className="max-h-[500px] overflow-y-auto pr-2">
+                    <PopMarkdown content={dailySummary} />
+                  </div>
                </div>
             ) : (
                <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
@@ -401,14 +442,33 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
               transition={{ type: "spring", stiffness: 240, damping: 18 }}
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="relative h-[360px] w-full">
+              <div className="relative h-[360px] w-full bg-black/5">
                 <Image
                   src={activeItem.imageUrl}
                   alt={activeItem.title}
                   fill
                   sizes="(min-width: 1024px) 60vw, 90vw"
-                  className="object-cover"
+                  className="object-contain"
                 />
+                
+                {/* Navigation Buttons */}
+                {hasPrev && (
+                    <button
+                        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full border-2 border-[#172554] bg-white p-2 text-[#172554] shadow-md hover:bg-[#FDE047] transition-colors"
+                        onClick={handlePrevGallery}
+                    >
+                        <ChevronLeft className="h-6 w-6" />
+                    </button>
+                )}
+                {hasNext && (
+                    <button
+                        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full border-2 border-[#172554] bg-white p-2 text-[#172554] shadow-md hover:bg-[#FDE047] transition-colors"
+                        onClick={handleNextGallery}
+                    >
+                        <ChevronRight className="h-6 w-6" />
+                    </button>
+                )}
+
               </div>
               <div className="space-y-2 p-6 text-[#172554]">
                 <h3 className="text-xl font-black">{activeItem.title}</h3>

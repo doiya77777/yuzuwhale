@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { ArrowUpRight, Loader2, X } from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
 import { NewsArticle, type NewsDetailData } from "@/components/news-article";
+import { SkeletonNewsArticle } from "@/components/skeleton-news-article";
 
 type NewsQuickReadProps = {
   item: NewsDetailData | null;
@@ -88,17 +89,15 @@ export function NewsQuickRead({
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
-          {item ? (
+          {isLoading ? (
+            <SkeletonNewsArticle />
+          ) : item ? (
             <NewsArticle item={item} />
           ) : (
             <div className="flex h-40 items-center justify-center">
-              {isLoading ? (
-                <Loader2 className="h-8 w-8 animate-spin text-[#172554]" />
-              ) : (
-                <span className="text-sm font-semibold text-[#172554]">
-                  暂无内容
-                </span>
-              )}
+              <span className="text-sm font-semibold text-[#172554]">
+                暂无内容
+              </span>
             </div>
           )}
         </div>
