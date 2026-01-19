@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Yuzu AI Playground",
+    title: "Yuzu",
     description: "Yuzu 的高能波普 AI 创作基地。",
     icons: {
         icon: [

@@ -66,6 +66,14 @@ function getNewsLabel(item: SiteConfig["news"][number]) {
 }
 
 export function HomeClient({ data, dailySummary }: HomeClientProps) {
+    const brandName = data.profile.name?.trim() || "Yuzu";
+    const shortBrand =
+        brandName
+            .replace(/yuzu\s*whale/gi, "Yuzu")
+            .replace(/柚子鲸/g, "Yuzu")
+            .replace(/whale|鲸/gi, "")
+            .replace(/\s+/g, " ")
+            .trim() || "Yuzu";
     const [activeId, setActiveId] = useState<number | null>(null);
     const activeItem = data.gallery.find((item) => item.id === activeId);
     const showGallery =
@@ -196,7 +204,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         />
                     )}
                     <span className="font-black tracking-wide hidden sm:inline">
-                        {data.profile.name || "YUZU.AI"}
+                        {shortBrand}
                     </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -227,7 +235,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                                 {data.profile.title}
                             </p>
                             <h1 className="text-4xl font-black uppercase leading-tight text-[#172554] sm:text-6xl">
-                                {data.profile.name}
+                                {shortBrand}
                             </h1>
                             <p className="text-lg font-semibold text-[#172554] sm:text-xl">
                                 {data.profile.slogan}
