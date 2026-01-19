@@ -233,6 +233,12 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
               >
                 今日资讯 →
               </Link>
+               <Link
+                href="/tools"
+                className={`${btnStyle} inline-flex items-center justify-center rounded-full bg-[#FDE047] active:bg-white`}
+              >
+                工具测评 🧪
+              </Link>
               <span className="rounded-full border-2 border-[#172554] bg-white px-4 py-3 text-sm font-bold text-[#172554] hard-shadow">
                 更新频率：每日
               </span>
