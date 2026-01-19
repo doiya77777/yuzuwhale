@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Github, Globe, Sparkles } from "lucide-react";
+import { Github, Globe, Loader2, Sparkles } from "lucide-react";
 import type { SiteConfig } from "@/data/site-config";
 import { cn } from "@/lib/utils";
 import { PopMarkdown } from "@/components/pop-markdown";
+import { getNewsDetail } from "@/app/news/actions";
+import type { NewsDetailData } from "@/components/news-article";
+import { NewsQuickRead } from "@/components/news-quick-read";
 
 // Custom X Icon (SVG)
 function XIcon({ className }: { className?: string }) {
@@ -60,7 +63,11 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
   const activeItem = data.gallery.find((item) => item.id === activeId);
   const showGallery =
     (data.profile.showGallery ?? false) && data.gallery.length > 0;
-  
+  const [activeNews, setActiveNews] = useState<NewsDetailData | null>(null);
+  const [openNewsId, setOpenNewsId] = useState<number | null>(null);
+  const [loadingNewsId, setLoadingNewsId] = useState<number | null>(null);
+  const openNewsIdRef = useRef<number | null>(null);
+
   // Filter out GitHub from socials and ensure Twitter uses XIcon
   const displaySocials = useMemo(() => {
     return data.profile.socials.filter(s => s.platform !== 'GitHub');
@@ -80,6 +87,33 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
     });
     return Array.from(groups.values()).slice(0, 3);
   }, [data.news]);
+
+  async function handleNewsClick(e: React.MouseEvent, id: number) {
+    e.preventDefault();
+    openNewsIdRef.current = id;
+    setOpenNewsId(id);
+    setActiveNews(null);
+    setLoadingNewsId(id);
+    try {
+      const data = await getNewsDetail(id);
+      if (data && openNewsIdRef.current === id) {
+        setActiveNews(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch news detail", err);
+    } finally {
+      if (openNewsIdRef.current === id) {
+        setLoadingNewsId(null);
+      }
+    }
+  }
+
+  function handleCloseNews() {
+    openNewsIdRef.current = null;
+    setOpenNewsId(null);
+    setActiveNews(null);
+    setLoadingNewsId(null);
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)]">
@@ -240,7 +274,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                       </span>
                     </div>
                     <div className="mt-4 space-y-3">
-                      {group.items.slice(0, 3).map((item) => (
+                  {group.items.slice(0, 3).map((item) => (
                         <motion.div
                           key={item.id}
                           whileHover={{ rotate: -1, x: 4, y: -4 }}
@@ -255,16 +289,28 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                             <span>{item.emoji}</span>
                             <span>{item.source}</span>
                           </div>
-                          <h3 className="mt-2 text-base font-black text-[#172554]">
+                          <Link
+                            href={`/news/${item.id}`}
+                            onClick={(event) => handleNewsClick(event, item.id)}
+                            className="mt-2 block text-base font-black text-[#172554] hover:text-[#1D4ED8] transition-colors"
+                          >
                             {item.title}
-                          </h3>
+                          </Link>
                           <div className="mt-3 flex items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
                             <span>{getNewsLabel(item)}</span>
                             <Link
                               href={`/news/${item.id}`}
+                              onClick={(event) => handleNewsClick(event, item.id)}
                               className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold"
                             >
-                              查看详情 →
+                              {loadingNewsId === item.id ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  加载中...
+                                </span>
+                              ) : (
+                                "查看详情 →"
+                              )}
                             </Link>
                           </div>
                         </motion.div>
@@ -372,6 +418,14 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
           </motion.div>
         ) : null}
       </AnimatePresence>
+
+      <NewsQuickRead
+        item={activeNews}
+        isOpen={openNewsId !== null}
+        isLoading={loadingNewsId !== null}
+        newsId={openNewsId}
+        onClose={handleCloseNews}
+      />
     </div>
   );
 }
