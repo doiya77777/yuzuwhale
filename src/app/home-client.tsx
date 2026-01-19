@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Github, Globe, Loader2, Sparkles, ChevronLeft, ChevronRight, FlaskConical, Newspaper, ArrowUpRight } from "lucide-react";
+import { Github, Globe, Loader2, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import type { SiteConfig } from "@/data/site-config";
 import { cn } from "@/lib/utils";
 import { PopMarkdown } from "@/components/pop-markdown";
@@ -32,6 +32,9 @@ const socials = {
   Xiaohongshu: Sparkles,
 };
 
+const btnStyle =
+  "px-6 py-3 bg-white font-black border-2 border-[#172554] shadow-[4px_4px_0px_0px_#172554] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:bg-[#FDE047]";
+
 type HomeClientProps = {
   data: SiteConfig;
   dailySummary?: string | null;
@@ -58,8 +61,8 @@ function getNewsLabel(item: SiteConfig["news"][number]) {
 export function HomeClient({ data, dailySummary }: HomeClientProps) {
   const [activeId, setActiveId] = useState<number | null>(null);
   const activeItem = data.gallery.find((item) => item.id === activeId);
-  const showGallery = (data.profile.showGallery ?? false) && data.gallery.length > 0;
-  
+  const showGallery =
+    (data.profile.showGallery ?? false) && data.gallery.length > 0;
   const [activeNews, setActiveNews] = useState<NewsDetailData | null>(null);
   const [openNewsId, setOpenNewsId] = useState<number | null>(null);
   const [loadingNewsId, setLoadingNewsId] = useState<number | null>(null);
@@ -87,6 +90,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
     }
   }, [hasNext, activeGalleryIndex, data.gallery]);
 
+  // Keyboard navigation for gallery
   useEffect(() => {
     if (!activeId) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,11 +106,26 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeId, handleNextGallery, handlePrevGallery]);
 
+
+  // Filter out GitHub from socials and ensure Twitter uses XIcon
   const displaySocials = useMemo(() => {
     return data.profile.socials.filter(s => s.platform !== 'GitHub');
   }, [data.profile.socials]);
 
-  const newsList = useMemo(() => data.news.slice(0, 5), [data.news]);
+  const groupedNews = useMemo(() => {
+    const groups = new Map<
+      string,
+      { date: string; items: SiteConfig["news"] }
+    >();
+    data.news.forEach((item) => {
+      const label = getNewsLabel(item) || "未标注日期";
+      if (!groups.has(label)) {
+        groups.set(label, { date: label, items: [] });
+      }
+      groups.get(label)?.items.push(item);
+    });
+    return Array.from(groups.values()).slice(0, 3);
+  }, [data.news]);
 
   async function handleNewsClick(e: React.MouseEvent, id: number) {
     e.preventDefault();
@@ -136,238 +155,320 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] p-4 sm:p-8">
-      <div className="pointer-events-none absolute inset-0 yuzu-bg opacity-60 fixed" />
+    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)]">
+      <div className="pointer-events-none absolute inset-0 yuzu-bg opacity-60" />
 
-      <main className="relative z-10 mx-auto max-w-7xl">
-        {/* BENTO GRID LAYOUT */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto]">
-          
-          {/* 1. IDENTITY CARD (Top Left, Large) */}
-          <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow md:col-span-2 lg:col-span-3 lg:p-10">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                         {data.profile.avatarUrl ? (
-                            <Image
-                            src={data.profile.avatarUrl}
-                            alt="Avatar"
-                            width={64}
-                            height={64}
-                            className="h-16 w-16 rounded-full border-4 border-[#172554]"
-                            priority
-                            />
-                        ) : (
-                            <div className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[#172554] bg-[#FDE047]">
-                                <span className="text-2xl">🐳</span>
-                            </div>
-                        )}
-                        <div>
-                            <h1 className="text-3xl font-black uppercase text-[#172554] sm:text-4xl">
-                                {data.profile.name}
-                            </h1>
-                            <p className="font-bold text-[#1D4ED8]">{data.profile.title}</p>
-                        </div>
-                    </div>
-                    
-                    <div className="max-w-xl space-y-2 text-base font-semibold text-[#1e3a8a]">
-                        <p>
-                            👋 欢迎来到 <span className="bg-[#FDE047] px-1 text-[#172554]">Yuzu Whale</span>。
-                            这是一个探索 <b>AI 技术</b>、<b>交互设计</b> 与 <b>独立开发</b> 的数字花园。
-                        </p>
-                        <p>
-                            我在这里同步每日资讯，分享深度产品测评，并折腾一些有趣的创意实验。
-                        </p>
-                    </div>
+      <header className="relative z-20 mx-auto flex w-full max-w-6xl items-center justify-between px-4 pb-6 pt-10 sm:px-6">
+        <div className="flex items-center gap-3 rounded-full border-4 border-[#172554] bg-white px-4 py-2 text-[#172554] hard-shadow">
+          {data.profile.avatarUrl ? (
+            <Image
+              src={data.profile.avatarUrl}
+              alt="Yuzu Whale avatar"
+              width={28}
+              height={28}
+              className="h-7 w-7 rounded-full border-2 border-[#172554]"
+              priority
+            />
+          ) : (
+            <Image
+              src="/yuzu.svg"
+              alt="Yuzu Whale icon"
+              width={28}
+              height={28}
+              className="h-7 w-7"
+              priority
+            />
+          )}
+          <span className="font-black tracking-wide hidden sm:inline">
+            {data.profile.name || "YUZU.AI"}
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          {displaySocials.map((social) => {
+            const Icon =
+              socials[social.platform as keyof typeof socials] ?? Globe;
+            return (
+              <a
+                key={social.platform}
+                href={social.url}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border-4 border-[#172554] bg-white p-2 text-[#172554] hard-shadow transition hover:-translate-y-1"
+              >
+                <Icon className="h-4 w-4" />
+              </a>
+            );
+          })}
+        </div>
+      </header>
 
-                    <div className="flex flex-wrap gap-2 pt-2">
-                        {data.profile.tags.map((tag) => (
-                            <span key={tag} className="rounded-lg border-2 border-[#172554]/20 bg-[#F8FAFC] px-3 py-1 text-xs font-bold text-[#172554]">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                </div>
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 pb-24 sm:px-6">
+        <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
+          <div className="space-y-6 self-center">
+            <div className="space-y-4">
+              <p className="text-sm font-semibold tracking-[0.3em] text-[#172554]">
+                {data.profile.title}
+              </p>
+              <h1 className="text-4xl font-black uppercase leading-tight text-[#172554] sm:text-6xl">
+                {data.profile.name}
+              </h1>
+              <p className="text-lg font-semibold text-[#172554] sm:text-xl">
+                {data.profile.slogan}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {data.profile.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border-2 border-[#172554] bg-white px-4 py-2 text-sm font-bold text-[#172554] hard-shadow"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/news"
+                className={`${btnStyle} inline-flex items-center justify-center rounded-full`}
+              >
+                今日资讯 →
+              </Link>
+               <Link
+                href="/products"
+                className={`${btnStyle} inline-flex items-center justify-center rounded-full bg-[#FDE047] active:bg-white`}
+              >
+                产品测评 🧪
+              </Link>
+              <span className="rounded-full border-2 border-[#172554] bg-white px-4 py-3 text-sm font-bold text-[#172554] hard-shadow">
+                更新频率：每日
+              </span>
+            </div>
 
-                {/* Socials (Absolute top right or flexed) */}
-                <div className="flex gap-2">
-                    {displaySocials.map((social) => {
-                        const Icon = socials[social.platform as keyof typeof socials] ?? Globe;
-                        return (
-                        <a
-                            key={social.platform}
-                            href={social.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#172554] bg-white text-[#172554] transition hover:bg-[#E0F2FE] hover:scale-110"
-                        >
-                            <Icon className="h-5 w-5" />
-                        </a>
-                        );
-                    })}
-                </div>
+            {/* Intro Block */}
+            <div className="mt-8 rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-5 text-sm font-medium leading-relaxed text-[#1e3a8a]">
+               <p>
+                 👋 欢迎来到 Yuzu Whale。这是一个探索 <span className="font-bold text-[#1D4ED8]">AI 技术</span>、<span className="font-bold text-[#1D4ED8]">交互设计</span> 与 <span className="font-bold text-[#1D4ED8]">独立开发</span> 的数字花园。
+               </p>
+               <p className="mt-2">
+                 我会在这里同步每日 AI 资讯简报，分享高质量的产品测评，以及我个人的创意实验作品。
+               </p>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center h-10 w-10 rounded-2xl border-4 border-[#172554] bg-[#FDE047] hard-shadow">
+                <span className="text-xl">🤖</span>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#172554] leading-none">Daily Focus</p>
+                <p className="text-lg font-black text-[#172554] leading-tight">
+                  AI 每日简报
+                </p>
+              </div>
             </div>
             
-            {/* Decoration */}
-            <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#FDE047]/20 blur-3xl pointer-events-none" />
-          </div>
-
-          {/* 2. DAILY FOCUS (Right Column / Tall on Desktop) */}
-          <div className="flex flex-col rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow md:col-span-1 md:row-span-2 lg:col-span-1 lg:row-span-2">
-             <div className="mb-4 flex items-center gap-2 border-b-2 border-[#172554]/10 pb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#172554] text-white">
-                    <Sparkles className="h-4 w-4" />
-                </div>
-                <h2 className="font-black text-[#172554]">Daily Focus</h2>
-             </div>
-             
-             <div className="flex-1 overflow-y-auto pr-1 scrollbar-hide">
-                 {dailySummary ? (
-                     <div className="prose prose-sm prose-p:my-2 prose-headings:my-2 prose-headings:text-[#172554] prose-strong:text-[#1D4ED8]">
-                         <PopMarkdown content={dailySummary} />
-                     </div>
-                 ) : (
-                     <div className="flex h-full flex-col items-center justify-center gap-2 text-[#172554]/50">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                        <span className="text-xs font-bold">正在生成今日简报...</span>
-                     </div>
-                 )}
-             </div>
-             <div className="mt-4 text-center text-[10px] font-bold text-[#172554]/40">
-                Generated by AI • {new Date().toLocaleDateString()}
-             </div>
-          </div>
-
-          {/* 3. PRODUCT LAB (Navigation Card A) */}
-          <Link 
-            href="/products"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border-4 border-[#172554] bg-[#FDE047] p-6 hard-shadow transition-all hover:-translate-y-1 hover:shadow-none active:translate-y-0 md:col-span-1"
-          >
-             <div className="relative z-10">
-                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#172554] bg-white">
-                    <FlaskConical className="h-5 w-5 text-[#172554]" />
-                 </div>
-                 <h3 className="text-2xl font-black text-[#172554]">Product Lab</h3>
-                 <p className="text-sm font-bold text-[#172554]/80">深度产品测评与解析</p>
-             </div>
-             <div className="mt-4 flex items-center gap-2 text-sm font-black text-[#172554]">
-                <span>进入实验室</span>
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-             </div>
-             <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-full bg-white/20 blur-xl group-hover:bg-white/30 transition-colors" />
-          </Link>
-
-          {/* 4. NEWS STATION (Navigation Card B) */}
-          <Link 
-            href="/news"
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border-4 border-[#172554] bg-[#E0F2FE] p-6 hard-shadow transition-all hover:-translate-y-1 hover:shadow-none active:translate-y-0 md:col-span-1"
-          >
-             <div className="relative z-10">
-                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border-2 border-[#172554] bg-white">
-                    <Newspaper className="h-5 w-5 text-[#172554]" />
-                 </div>
-                 <h3 className="text-2xl font-black text-[#172554]">Info Station</h3>
-                 <p className="text-sm font-bold text-[#172554]/80">每日 AI 资讯速递</p>
-             </div>
-             <div className="mt-4 flex items-center gap-2 text-sm font-black text-[#172554]">
-                <span>查看全部</span>
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-             </div>
-          </Link>
-
-          {/* 5. GALLERY PREVIEW (Navigation Card C / or Gallery Image) */}
-           {showGallery && data.gallery.length > 0 ? (
-               <div className="group relative overflow-hidden rounded-3xl border-4 border-[#172554] bg-white p-0 hard-shadow md:col-span-1">
-                   <Image
-                     src={data.gallery[0].imageUrl}
-                     alt="Gallery Preview"
-                     fill
-                     className="object-cover transition-transform duration-500 group-hover:scale-110"
-                   />
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#172554]/80 to-transparent flex flex-col justify-end p-4">
-                        <span className="text-xs font-bold text-[#FDE047]">Latest Art</span>
-                        <h4 className="text-lg font-black text-white truncate">{data.gallery[0].title}</h4>
-                   </div>
-                   <button 
-                     onClick={() => setActiveId(data.gallery[0].id)}
-                     className="absolute inset-0 z-10"
-                     aria-label="View Gallery"
-                   />
+            {dailySummary ? (
+               <div className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-2 opacity-10 pointer-events-none">
+                    <Sparkles className="h-12 w-12 text-[#172554]" />
+                  </div>
+                  <div className="max-h-[500px] overflow-y-auto pr-2">
+                    <PopMarkdown content={dailySummary} />
+                  </div>
                </div>
-           ) : (
-                // Fallback if no gallery: Maybe a "Contact Me" card?
-                <a href={`mailto:${data.profile.email}`} className="flex flex-col items-center justify-center rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow hover:bg-gray-50 md:col-span-1">
-                    <span className="text-3xl">📧</span>
-                    <span className="mt-2 font-black text-[#172554]">Contact Me</span>
-                </a>
-           )}
+            ) : (
+               <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#E0F2FE] px-4 py-3">
+                    <span>更新频率</span>
+                    <span>每日</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#FEF3C7] px-4 py-3">
+                    <span>内容类型</span>
+                    <span>资讯 / Prompt</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-white px-4 py-3">
+                    <span>合作邮箱</span>
+                    <span>{data.profile.email || "-"}</span>
+                  </div>
+               </div>
+            )}
+          </div>
+        </section>
 
-           {/* 6. LATEST NEWS FEED (Wide Bottom Block) */}
-           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow md:col-span-3 lg:col-span-3">
-                <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-xl font-black text-[#172554]">Latest Updates</h3>
-                    <Link href="/news" className="text-xs font-bold text-[#1D4ED8] hover:underline">View All</Link>
-                </div>
-                <div className="space-y-3">
-                    {newsList.map((item) => (
-                        <div 
-                            key={item.id} 
-                            onClick={(e) => handleNewsClick(e, item.id)}
-                            className="group flex cursor-pointer items-center justify-between gap-4 rounded-xl border-2 border-transparent bg-[#F8FAFC] px-4 py-3 transition-colors hover:border-[#172554] hover:bg-white"
+        <section
+          className={cn(
+            "grid gap-8",
+            showGallery ? "lg:grid-cols-[1.05fr_0.95fr]" : "lg:grid-cols-1",
+          )}
+        >
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📰</span>
+              <h2 className="text-2xl font-black text-[#172554]">
+                News / 情报站
+              </h2>
+              <Link
+                href="/news"
+                className="ml-auto rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold hard-shadow"
+              >
+                查看全部 →
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {groupedNews.length ? (
+                groupedNews.map((group) => (
+                  <div
+                    key={group.date}
+                    className="rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="rounded-full bg-[#1D4ED8] px-3 py-1 text-xs font-bold text-white">
+                        {group.date}
+                      </span>
+                      <span className="text-xs font-semibold text-[#172554]">
+                        共 {group.items.length} 条
+                      </span>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                  {group.items.slice(0, 3).map((item) => (
+                        <motion.div
+                          key={item.id}
+                          whileHover={{ rotate: -1, x: 4, y: -4 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 240,
+                            damping: 15,
+                          }}
+                          className="rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-4"
                         >
-                            <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                                <span className="w-fit shrink-0 rounded bg-[#E0F2FE] px-2 py-0.5 text-[10px] font-bold text-[#172554]">
-                                    {getNewsLabel(item)}
+                          <div className="flex items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
+                            <span>{item.emoji}</span>
+                            <span>{item.source}</span>
+                          </div>
+                          <Link
+                            href={`/news/${item.id}`}
+                            onClick={(event) => handleNewsClick(event, item.id)}
+                            className="mt-2 block text-base font-black text-[#172554] hover:text-[#1D4ED8] transition-colors"
+                          >
+                            {item.title}
+                          </Link>
+                          <div className="mt-3 flex items-center justify-between gap-3 text-xs font-semibold text-[#172554]">
+                            <span>{getNewsLabel(item)}</span>
+                            <Link
+                              href={`/news/${item.id}`}
+                              onClick={(event) => handleNewsClick(event, item.id)}
+                              className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold"
+                            >
+                              {loadingNewsId === item.id ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                  加载中...
                                 </span>
-                                <span className="truncate text-sm font-bold text-[#172554] group-hover:text-[#1D4ED8]">
-                                    {item.title}
-                                </span>
-                            </div>
-                            <div className="text-lg opacity-0 transition-opacity group-hover:opacity-100">
-                                →
-                            </div>
-                        </div>
-                    ))}
-                    {newsList.length === 0 && (
-                        <div className="py-4 text-center text-sm font-semibold text-[#1e3a8a]">暂无最新资讯</div>
-                    )}
+                              ) : (
+                                "查看详情 →"
+                              )}
+                            </Link>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-3xl border-4 border-[#172554] bg-white p-5 text-sm font-semibold text-[#1e3a8a] hard-shadow">
+                  暂无资讯，请先运行 RSS 同步脚本。
                 </div>
-           </div>
+              )}
+            </div>
+          </div>
 
-        </div>
+          {showGallery ? (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎨</span>
+                <h2 className="text-2xl font-black text-[#172554]">
+                  Gallery / 作品集
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {data.gallery.map((item) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => setActiveId(item.id)}
+                    className="relative overflow-hidden rounded-3xl border-4 border-[#172554] bg-white p-4 text-left hard-shadow"
+                  >
+                    <div className="relative h-36 w-full overflow-hidden rounded-2xl border-4 border-[#172554]">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.title}
+                        fill
+                        sizes="(min-width: 1024px) 28vw, 45vw"
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="mt-3 flex items-center justify-between">
+                      <span className="text-sm font-black text-[#172554]">
+                        {item.title}
+                      </span>
+                      <span className="rounded-full bg-[#1D4ED8] px-2 py-1 text-xs font-bold text-white">
+                        {item.tag}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xs font-semibold text-[#172554]">
+                      {item.prompt}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
 
-        {/* Footer */}
-        <footer className="mt-16 text-center text-xs font-bold text-[#172554]/60">
-             © 2026 Yuzu Whale. Designed & Built with ❤️.
+        <footer className="rounded-3xl border-4 border-[#172554] bg-white/80 p-6 text-[#172554] hard-shadow">
+          <div className="rounded-3xl border-4 border-[#172554] bg-white p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-bold">商务合作</p>
+                <p className="text-sm">{data.profile.email}</p>
+              </div>
+              <div className="text-xs font-semibold">
+                © 2025 Yuzu Whale. All rights reserved.
+              </div>
+            </div>
+          </div>
         </footer>
       </main>
 
-      {/* MODALS */}
       <AnimatePresence>
         {activeItem ? (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/80 p-6 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a]/70 p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActiveId(null)}
           >
             <motion.div
-              className="relative w-full max-w-4xl overflow-hidden rounded-3xl border-4 border-[#172554] bg-white shadow-2xl"
+              className="relative w-full max-w-3xl overflow-hidden rounded-3xl border-4 border-[#172554] bg-white hard-shadow"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 240, damping: 18 }}
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="relative flex aspect-video w-full items-center justify-center bg-black/5">
+              <div className="relative h-[360px] w-full bg-black/5">
                 <Image
                   src={activeItem.imageUrl}
                   alt={activeItem.title}
                   fill
+                  sizes="(min-width: 1024px) 60vw, 90vw"
                   className="object-contain"
                 />
-                 {/* Navigation Buttons */}
-                 {hasPrev && (
+                
+                {/* Navigation Buttons */}
+                {hasPrev && (
                     <button
                         className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full border-2 border-[#172554] bg-white p-2 text-[#172554] shadow-md hover:bg-[#FDE047] transition-colors"
                         onClick={handlePrevGallery}
@@ -383,15 +484,11 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         <ChevronRight className="h-6 w-6" />
                     </button>
                 )}
+
               </div>
-              <div className="flex items-center justify-between border-t-4 border-[#172554] bg-white p-6">
-                 <div>
-                    <h3 className="text-xl font-black text-[#172554]">{activeItem.title}</h3>
-                    <p className="text-sm font-semibold text-[#1e3a8a]">{activeItem.prompt}</p>
-                 </div>
-                 <div className="rounded-full bg-[#1D4ED8] px-3 py-1 text-xs font-bold text-white">
-                    {activeItem.tag}
-                 </div>
+              <div className="space-y-2 p-6 text-[#172554]">
+                <h3 className="text-xl font-black">{activeItem.title}</h3>
+                <p className="text-sm font-semibold">{activeItem.prompt}</p>
               </div>
             </motion.div>
           </motion.div>
