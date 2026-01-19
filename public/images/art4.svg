@@ -9,5 +9,5 @@
   <rect x="140" y="180" width="520" height="240" rx="120" fill="#fecaca" />
   <circle cx="280" cy="300" r="18" fill="#0f172a" />
   <circle cx="420" cy="300" r="18" fill="#0f172a" />
-  <text x="60" y="520" font-size="40" fill="#475569" font-family="Nunito, sans-serif">Whale Arcade</text>
+  <text x="60" y="520" font-size="40" fill="#475569" font-family="Nunito, sans-serif">Yuzu Arcade</text>
 </svg>
