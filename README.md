@@ -1,4 +1,4 @@
-# Yuzu Whale Site
+# Yuzu Site
 
 ## Local Dev
 

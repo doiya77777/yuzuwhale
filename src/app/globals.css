@@ -1,17 +1,29 @@
 @import "tailwindcss";
 
 :root {
-    --primary: #fde047;
-    --secondary: #1d4ed8;
+    --primary: #fff7ea;
+    --secondary: #1f2a44;
     --accent: #ffffff;
-    --text: #0f172a;
-    --border: #172554;
-    --yuzu-ink: #172554;
-    --yuzu-yellow: #fde047;
-    --yuzu-sky: #e0f2fe;
+    --text: #1f2a44;
+    --border: #f1e4cf;
+    --yuzu-ink: #1f2a44;
+    --yuzu-ink-soft: #3a4761;
+    --yuzu-muted: #6c7a94;
+    --yuzu-cream: #fff7ea;
+    --yuzu-blush: #ffe9d6;
+    --yuzu-lemon: #ffe7a6;
+    --yuzu-mint: #e9f7f0;
+    --yuzu-sky: #e9f1ff;
     --yuzu-paper: #ffffff;
-    --yuzu-wash: #f8fafc;
-    --yuzu-shadow: rgba(23, 37, 84, 0.12);
+    --yuzu-wash: #fffaf2;
+    --yuzu-shadow: rgba(31, 42, 68, 0.12);
+    --yuzu-shadow-soft: rgba(31, 42, 68, 0.08);
+    --font-display:
+        "SF Pro Rounded", "PingFang SC", "Hiragino Sans", "Noto Sans CJK SC",
+        "Segoe UI", "Helvetica Neue", sans-serif;
+    --font-body:
+        "PingFang SC", "Hiragino Sans", "Noto Sans CJK SC", "SF Pro Rounded",
+        "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
 @theme inline {
@@ -27,20 +39,73 @@
 }
 
 body {
-    background: linear-gradient(135deg, #fef9c3 0%, #e0f2fe 100%);
-    color: var(--text);
+    background: linear-gradient(
+        135deg,
+        var(--yuzu-cream) 0%,
+        var(--yuzu-sky) 55%,
+        var(--yuzu-mint) 100%
+    );
+    color: var(--yuzu-ink);
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
+.font-display {
+    font-family:
+        var(--font-display), var(--font-body), ui-sans-serif, system-ui,
+        sans-serif;
+    letter-spacing: 0.01em;
+}
+
+.text-ink {
+    color: var(--yuzu-ink);
+}
+
+.text-ink-soft {
+    color: var(--yuzu-ink-soft);
+}
+
+.text-ink-muted {
+    color: var(--yuzu-muted);
+}
+
+.yuzu-shell {
+    background: linear-gradient(
+        135deg,
+        var(--yuzu-cream) 0%,
+        var(--yuzu-sky) 55%,
+        var(--yuzu-mint) 100%
+    );
+}
+
+.yuzu-orb {
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 231, 166, 0.9),
+        rgba(255, 231, 166, 0) 68%
+    );
+}
+
+.yuzu-orb-cool {
+    background: radial-gradient(
+        circle at 70% 30%,
+        rgba(233, 241, 255, 0.9),
+        rgba(233, 241, 255, 0) 68%
+    );
+}
+
 .yuzu-bg {
-    background-image: url("/doodle-bg.svg");
-    background-size: 240px 240px;
+    background-image: radial-gradient(
+        circle at 1px 1px,
+        rgba(31, 42, 68, 0.06) 1px,
+        transparent 0
+    );
+    background-size: 26px 26px;
     background-repeat: repeat;
     background-position: center;
 }
 
 .markdown {
-    color: #0f172a;
+    color: var(--yuzu-ink);
     line-height: 1.8;
 }
 
@@ -48,7 +113,7 @@ body {
 .markdown h3 {
     margin-top: 1.5rem;
     font-weight: 800;
-    color: #172554;
+    color: var(--yuzu-ink);
 }
 
 .markdown p {
@@ -66,20 +131,20 @@ body {
 }
 
 .markdown a {
-    color: #1d4ed8;
+    color: #3b6dd8;
     font-weight: 700;
     text-decoration: underline;
 }
 
 .markdown blockquote {
     margin-top: 1rem;
-    border-left: 4px solid #1d4ed8;
+    border-left: 4px solid #3b6dd8;
     padding-left: 1rem;
-    color: #1e3a8a;
+    color: var(--yuzu-ink-soft);
 }
 
 .markdown code {
-    background: #e0f2fe;
+    background: var(--yuzu-sky);
     padding: 0.2rem 0.4rem;
     border-radius: 0.4rem;
     font-weight: 600;
@@ -88,7 +153,7 @@ body {
 .markdown img {
     max-width: 100%;
     border-radius: 1rem;
-    border: 3px solid #172554;
+    border: 3px solid var(--border);
     margin-top: 1rem;
 }
 
@@ -100,18 +165,37 @@ body {
 
 .markdown th,
 .markdown td {
-    border: 2px solid #172554;
+    border: 2px solid var(--border);
     padding: 0.5rem;
     text-align: left;
 }
 
 .hard-shadow {
-    box-shadow: 4px 4px 0 0 var(--border);
+    box-shadow: 0 14px 36px var(--yuzu-shadow);
 }
 
 .yuzu-panel {
-    border-color: var(--yuzu-ink);
-    box-shadow: 4px 4px 0 0 var(--yuzu-ink);
+    border-color: var(--border);
+    box-shadow: 0 14px 36px var(--yuzu-shadow);
+}
+
+.soft-card {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 18px 45px var(--yuzu-shadow);
+    backdrop-filter: blur(8px);
+}
+
+.soft-pill {
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 24px var(--yuzu-shadow-soft);
+    backdrop-filter: blur(8px);
+}
+
+.soft-tint {
+    border: 1px solid var(--border);
+    background: var(--yuzu-wash);
 }
 
 @keyframes floaty {

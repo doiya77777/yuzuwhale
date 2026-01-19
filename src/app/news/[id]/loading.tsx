@@ -1,9 +1,10 @@
 export default function Loading() {
-  return (
-    <div className="min-h-screen bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] px-4 pb-24 pt-10 text-[#172554]">
-      <div className="mx-auto max-w-3xl rounded-3xl border-4 border-[#172554] bg-white p-6 text-center hard-shadow">
-        正在加载详情...
-      </div>
-    </div>
-  );
+    return (
+        <div className="relative min-h-screen yuzu-shell px-4 pb-24 pt-10 text-ink">
+            <div className="pointer-events-none absolute inset-0 yuzu-bg opacity-35" />
+            <div className="relative mx-auto max-w-3xl rounded-3xl soft-card p-6 text-center">
+                正在加载详情...
+            </div>
+        </div>
+    );
 }
