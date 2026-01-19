@@ -46,13 +46,13 @@ export function NewsQuickRead({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-end justify-center bg-black/30 transition-opacity duration-300 lg:items-stretch lg:justify-end ${
+      className={`fixed inset-0 z-50 flex items-stretch justify-center bg-black/30 transition-opacity duration-300 lg:justify-end ${
         isOpen ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
       }`}
       onClick={onClose}
     >
       <div
-        className={`flex h-[92vh] w-full transform flex-col overflow-hidden rounded-t-3xl bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] shadow-2xl transition-transform duration-300 lg:h-full lg:max-w-4xl lg:rounded-none ${
+        className={`flex h-[100dvh] w-full transform flex-col overflow-hidden rounded-none bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] shadow-2xl transition-transform duration-300 lg:h-full lg:max-w-4xl ${
           isOpen
             ? "translate-y-0 lg:translate-x-0"
             : "translate-y-full lg:translate-y-0 lg:translate-x-full"
@@ -87,7 +87,7 @@ export function NewsQuickRead({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <div className="flex-1 overflow-y-auto p-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-6">
           {item ? (
             <NewsArticle item={item} />
           ) : (
