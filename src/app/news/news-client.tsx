@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Filter, X, Calendar, ChevronDown } from "lucide-react";
+import { Search, Filter, X, Calendar, ChevronDown, Loader2 } from "lucide-react";
+import { getNewsDetail } from "./actions";
+import { NewsArticle, type NewsDetailData } from "@/components/news-article";
 
 type NewsListItem = {
   id: number;
@@ -61,12 +63,59 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
   const [dateFilter, setDateFilter] = useState(initialDate || "");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // Sidebar / Modal State
+  const [activeNews, setActiveNews] = useState<NewsDetailData | null>(null);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+
   useEffect(() => {
     setDateFilter(initialDate || "");
     if (initialDate) {
       setRangeFilter("all");
     }
   }, [initialDate]);
+
+  // Handle ESC key to close sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveNews(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Lock body scroll when sidebar is open
+  useEffect(() => {
+    if (activeNews) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [activeNews]);
+
+  async function handleNewsClick(e: React.MouseEvent, id: number) {
+    // Only intercept on larger screens (lg: 1024px)
+    if (window.innerWidth >= 1024) {
+      e.preventDefault();
+      setLoadingId(id);
+      try {
+        const data = await getNewsDetail(id);
+        if (data) {
+          // Adapt the data to match NewsDetailData if needed
+          // The actions.ts returns structure compatible with NewsDetailData
+          setActiveNews(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch news detail", err);
+      } finally {
+        setLoadingId(null);
+      }
+    }
+  }
 
   function updateDateParam(nextDate: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -140,6 +189,44 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
 
   return (
     <div className="space-y-6">
+      {/* Sidebar Overlay */}
+      <div 
+        className={`fixed inset-0 z-50 flex justify-end bg-black/20 transition-opacity duration-300 ${
+          activeNews ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setActiveNews(null)}
+      >
+        <div 
+          className={`h-full w-full max-w-4xl transform overflow-y-auto bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] shadow-2xl transition-transform duration-300 ${
+            activeNews ? "translate-x-0" : "translate-x-full"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+           {/* Sidebar Header/Close */}
+           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#172554]/10 bg-white/80 p-4 backdrop-blur-md">
+             <h2 className="text-lg font-black text-[#172554]">
+               资讯详情
+             </h2>
+             <button 
+               onClick={() => setActiveNews(null)}
+               className="rounded-full bg-[#172554]/10 p-2 text-[#172554] hover:bg-[#172554]/20"
+             >
+               <X className="h-5 w-5" />
+             </button>
+           </div>
+           
+           <div className="p-6">
+             {activeNews ? (
+               <NewsArticle item={activeNews} />
+             ) : (
+               <div className="flex h-40 items-center justify-center">
+                 <Loader2 className="h-8 w-8 animate-spin text-[#172554]" />
+               </div>
+             )}
+           </div>
+        </div>
+      </div>
+
       {/* Refactored Filter Bar: Compact & Collapsible */}
       <div className="sticky top-4 z-20 rounded-3xl border-4 border-[#172554] bg-white p-3 hard-shadow transition-all">
         <div className="flex items-center gap-2">
@@ -275,9 +362,16 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
                     <span>{item.emoji}</span>
                     <span>{item.source}</span>
                   </div>
-                  <h2 className="mt-3 text-lg font-black text-[#172554]">
+                  
+                  {/* Clickable Title */}
+                  <Link
+                    href={`/news/${item.id}`}
+                    onClick={(e) => handleNewsClick(e, item.id)}
+                    className="mt-3 block text-lg font-black text-[#172554] hover:text-[#1D4ED8] transition-colors"
+                  >
                     {item.title}
-                  </h2>
+                  </Link>
+                  
                   {item.summary ? (
                     <p className="mt-2 text-sm font-semibold text-[#1e3a8a]">
                       {item.summary}
@@ -287,9 +381,15 @@ export function NewsClient({ items, initialDate }: NewsClientProps) {
                     <span>{getDateLabel(item)}</span>
                     <Link
                       href={`/news/${item.id}`}
-                      className="rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold hover:bg-[#fde047]/80"
+                      onClick={(e) => handleNewsClick(e, item.id)}
+                      className="inline-flex items-center gap-1 rounded-full border-2 border-[#172554] bg-[#FDE047] px-3 py-1 font-bold hover:bg-[#fde047]/80 disabled:opacity-50"
                     >
-                      阅读详情 →
+                      {loadingId === item.id ? (
+                        <>
+                           <Loader2 className="h-3 w-3 animate-spin" />
+                           加载中...
+                        </>
+                      ) : "阅读详情 →"}
                     </Link>
                     {item.url ? (
                       <a
