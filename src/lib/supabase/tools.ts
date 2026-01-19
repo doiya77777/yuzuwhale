@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { MOCK_TOOLS, type Tool } from "@/data/mock-tools";
+import { MOCK_PRODUCTS, type Product } from "@/data/mock-products";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,34 +10,33 @@ const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey) 
   : null;
 
-export async function getTools(): Promise<Tool[]> {
+export async function getProducts(): Promise<Product[]> {
   if (!supabase) {
-    console.warn("Supabase not configured, returning mock tools.");
-    return MOCK_TOOLS;
+    console.warn("Supabase not configured, returning mock products.");
+    return MOCK_PRODUCTS;
   }
 
   const { data, error } = await supabase
-    .from("tools")
+    .from("tools") // Keep table name as 'tools' for now
     .select("*")
     .eq("published", true)
     .order("rating_overall", { ascending: false });
 
   if (error) {
-    console.error("Error fetching tools:", error);
-    return MOCK_TOOLS; // Fallback to mock on error
+    console.error("Error fetching products:", error);
+    return MOCK_PRODUCTS; // Fallback to mock on error
   }
 
-  // If table is empty, return mock data for demonstration
   if (!data || data.length === 0) {
-      return MOCK_TOOLS;
+      return MOCK_PRODUCTS;
   }
 
-  return data as Tool[];
+  return data as Product[];
 }
 
-export async function getToolBySlug(slug: string): Promise<Tool | null> {
+export async function getProductBySlug(slug: string): Promise<Product | null> {
     if (!supabase) {
-        return MOCK_TOOLS.find(t => t.slug === slug) || null;
+        return MOCK_PRODUCTS.find(t => t.slug === slug) || null;
     }
 
     const { data, error } = await supabase
@@ -47,9 +46,8 @@ export async function getToolBySlug(slug: string): Promise<Tool | null> {
         .single();
     
     if (error || !data) {
-        // Fallback to mock
-        return MOCK_TOOLS.find(t => t.slug === slug) || null;
+        return MOCK_PRODUCTS.find(t => t.slug === slug) || null;
     }
 
-    return data as Tool;
+    return data as Product;
 }

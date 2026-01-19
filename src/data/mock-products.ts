@@ -1,4 +1,4 @@
-export type Tool = {
+export type Product = {
   id: number;
   slug: string;
   title: string;
@@ -19,35 +19,33 @@ export type Tool = {
   created_at: string;
 };
 
-export const MOCK_TOOLS: Tool[] = [
+export const MOCK_PRODUCTS: Product[] = [
   {
     id: 1,
     slug: "cursor",
     title: "Cursor",
-    subtitle: "AI Native 代码编辑器",
+    subtitle: "重新定义编码体验的 AI 编辑器",
     cover_image: "https://images.unsplash.com/photo-1642132652859-3ef5a92903ae?q=80&w=3260&auto=format&fit=crop",
     category: "IDE",
-    tags: ["AI Coding", "VS Code Fork", "Productivity"],
+    tags: ["生产力", "VS Code", "AI Native"],
     rating_overall: 4.8,
     rating_usability: 5.0,
     rating_features: 4.5,
     rating_price: 3.5,
     rating_community: 4.0,
-    pros: ["无缝继承 VS Code 插件生态", "Codebase 索引能力极强", "Tab 补全体验流畅"],
-    cons: ["每月 $20 订阅费略贵", "偶尔索引会卡顿"],
+    pros: ["意图预测 (Copilot++) 极其精准", "Codebase 全局索引能力强", "无缝迁移 VS Code 配置"],
+    cons: ["订阅价格较高 ($20/mo)", "大型项目索引偶尔卡顿"],
     content: `
-## Cursor 为什么这么火？
+## 为什么它是目前最好的 AI 编辑器？
 
-Cursor 是目前最接近 "AI Native" 定义的代码编辑器。它不仅仅是一个加了 Chat 窗口的 VS Code，而是深入到了编辑器内核。
+在试用了 Copilot X, Cody, Codeium 等众多竞品后，Cursor 给我的感觉是唯一一个真正思考 "AI Native" 交互的产品。
 
-### 核心亮点
+它不再是简单的 "侧边栏聊天框"，而是将 AI 植入到了光标的每一次跳动中。
 
-1. **Copilot++**: 它的预测能力远超 GitHub Copilot，能够根据你的光标移动预测下一个改动位置。
-2. **Codebase Context**: 它可以读取整个项目文件，当你问 "如何增加一个新页面" 时，它知道你的路由结构、组件规范。
+### 核心体验
 
-### 真实体验
-
-我用它重构了 Yuzu Whale 的前端代码，效率提升了至少 30%。特别是处理繁琐的 TypeScript 类型定义时，它几乎能秒给正确答案。
+1.  **沉浸式补全**: 当你敲下回车，它似乎知道你下一步要写 \`console.log\` 还是 \`if (err)\`。这种 "心流" 不被打断的感觉非常棒。
+2.  **自然语言改代码**: 选中一段乱糟糟的逻辑，Cmd+K 输入 "优化可读性并添加注释"，它直接原地 Diff 修改，无需复制粘贴。
     `,
     website_url: "https://cursor.sh",
     published: true,
@@ -57,26 +55,28 @@ Cursor 是目前最接近 "AI Native" 定义的代码编辑器。它不仅仅是
     id: 2,
     slug: "v0-dev",
     title: "v0.dev",
-    subtitle: "生成式 UI 设计工具 by Vercel",
+    subtitle: "Vercel 出品的生成式 UI 设计神器",
     cover_image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
     category: "Design",
-    tags: ["UI/UX", "Tailwind CSS", "React"],
+    tags: ["UI/UX", "Generative AI", "React"],
     rating_overall: 4.5,
     rating_usability: 4.8,
     rating_features: 4.0,
     rating_price: 4.0,
     rating_community: 3.5,
-    pros: ["生成的 Shadcn UI 代码质量极高", "支持深色模式预览", "与 Next.js 生态完美融合"],
-    cons: ["复杂交互逻辑生成能力较弱", "目前仅支持 React/Tailwind 栈"],
+    pros: ["生成的 Shadcn UI 代码直接可用", "支持深色模式一键切换", "交互式迭代修改体验好"],
+    cons: ["复杂业务逻辑生成能力较弱", "目前仅限于 React 技术栈"],
     content: `
-## 前端开发的加速器
+## 前端开发的 "Midjourney"
 
 v0.dev 彻底改变了原型开发流程。以前我们需要 Figma -> Code，现在直接 Prompt -> Code。
 
-### 最佳实践
+对于独立开发者来说，这意味着你不再需要雇佣设计师，甚至不需要自己纠结配色和圆角。
 
-- **迭代式生成**: 不要试图一次生成整个 Dashboard。先生成 Sidebar，再生成 Header，最后生成 Content Area。
-- **带图 Prompt**: 上传一张手绘草图，它的还原度惊人。
+### 体验心得
+
+-   **用图生图**: 随手画一个线框图，或者截一张竞品的图扔进去，它能还原 80% 的结构。
+-   **组件化思维**: 不要试图让它一次生成整个 Dashboard。让它先生成 "一个带有搜索栏和用户头像的顶部导航"，效果最好。
     `,
     website_url: "https://v0.dev",
     published: true,
@@ -88,8 +88,8 @@ v0.dev 彻底改变了原型开发流程。以前我们需要 Figma -> Code，�
     title: "Dify",
     subtitle: "开源 LLM 应用开发平台",
     cover_image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2832&auto=format&fit=crop",
-    category: "Agent",
-    tags: ["LLM Ops", "Workflow", "No-Code"],
+    category: "LLM Ops",
+    tags: ["Agent", "Workflow", "Open Source"],
     rating_overall: 4.7,
     rating_usability: 4.2,
     rating_features: 4.8,
