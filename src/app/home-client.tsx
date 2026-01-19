@@ -243,16 +243,6 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                 更新频率：每日
               </span>
             </div>
-
-            {/* Intro Block */}
-            <div className="mt-8 rounded-2xl border-2 border-[#172554] bg-[#F8FAFC] p-5 text-sm font-medium leading-relaxed text-[#1e3a8a]">
-               <p>
-                 👋 欢迎来到 Yuzu Whale。这是一个探索 <span className="font-bold text-[#1D4ED8]">AI 技术</span>、<span className="font-bold text-[#1D4ED8]">交互设计</span> 与 <span className="font-bold text-[#1D4ED8]">独立开发</span> 的数字花园。
-               </p>
-               <p className="mt-2">
-                 我会在这里同步每日 AI 资讯简报，分享高质量的产品测评，以及我个人的创意实验作品。
-               </p>
-            </div>
           </div>
 
           <div className="rounded-3xl border-4 border-[#172554] bg-white p-6 hard-shadow">
@@ -295,6 +285,51 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
             )}
           </div>
         </section>
+
+        {/* Product Lab Section */}
+        {data.products && data.products.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🧪</span>
+              <h2 className="text-2xl font-black text-[#172554]">
+                Product Lab / 产品测评
+              </h2>
+              <Link
+                href="/products"
+                className="ml-auto rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold hard-shadow"
+              >
+                查看全部 →
+              </Link>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {data.products.slice(0, 3).map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.slug}`}
+                  className="group relative flex flex-col rounded-3xl border-4 border-[#172554] bg-white p-5 hard-shadow transition-all hover:-translate-y-1 hover:shadow-none active:translate-y-0"
+                >
+                  <div className="flex items-start justify-between">
+                    <span className="rounded-full bg-[#E0F2FE] px-2 py-0.5 text-[10px] font-bold text-[#172554] border-2 border-[#172554]">
+                      {product.category}
+                    </span>
+                    <span className="text-xs font-black text-[#172554]">⭐️ {product.ratingOverall}</span>
+                  </div>
+                  <h3 className="mt-3 text-xl font-black text-[#172554] group-hover:text-[#1D4ED8]">
+                    {product.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-semibold text-[#1e3a8a] line-clamp-2 italic">
+                    {product.subtitle}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-1">
+                    {product.tags.slice(0, 2).map(tag => (
+                      <span key={tag} className="text-[10px] font-bold text-[#172554]/50 tracking-tight">#{tag}</span>
+                    ))}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section
           className={cn(

@@ -36,8 +36,20 @@ export type GalleryItem = {
   prompt: string;
 };
 
+export type Product = {
+  id: number;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  coverImage: string | null;
+  category: string;
+  tags: string[];
+  ratingOverall: number;
+};
+
 export type SiteConfig = {
   profile: Profile;
   news: NewsItem[];
   gallery: GalleryItem[];
+  products: Product[];
 };

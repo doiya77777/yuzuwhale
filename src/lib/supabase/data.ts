@@ -2,6 +2,7 @@ import type {
   GalleryItem,
   NewsItem,
   Profile,
+  Product,
   SiteConfig,
   SocialLink,
 } from "@/data/site-config";
@@ -85,5 +86,22 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
     color: DEFAULT_COLOR,
   }));
 
-  return { profile, news, gallery };
+  const { data: productRows } = await supabase
+    .from("tools")
+    .select("id,slug,title,subtitle,cover_image,category,tags,rating_overall")
+    .eq("published", true)
+    .order("rating_overall", { ascending: false });
+
+  const products: Product[] = (productRows ?? []).map((item) => ({
+    id: Number(item.id),
+    slug: item.slug,
+    title: item.title,
+    subtitle: item.subtitle,
+    coverImage: item.cover_image,
+    category: item.category,
+    tags: item.tags ?? [],
+    ratingOverall: Number(item.rating_overall),
+  }));
+
+  return { profile, news, gallery, products };
 }
