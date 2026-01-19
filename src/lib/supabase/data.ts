@@ -7,6 +7,7 @@ import type {
   SocialLink,
 } from "@/data/site-config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { MOCK_PRODUCTS } from "@/data/mock-products";
 
 const DEFAULT_COLOR = "bg-white";
 
@@ -92,16 +93,31 @@ export async function fetchSiteConfig(): Promise<SiteConfig | null> {
     .eq("published", true)
     .order("rating_overall", { ascending: false });
 
-  const products: Product[] = (productRows ?? []).map((item) => ({
-    id: Number(item.id),
-    slug: item.slug,
-    title: item.title,
-    subtitle: item.subtitle,
-    coverImage: item.cover_image,
-    category: item.category,
-    tags: item.tags ?? [],
-    ratingOverall: Number(item.rating_overall),
-  }));
+  let products: Product[] = [];
+  if (productRows && productRows.length > 0) {
+     products = productRows.map((item) => ({
+        id: Number(item.id),
+        slug: item.slug,
+        title: item.title,
+        subtitle: item.subtitle,
+        coverImage: item.cover_image,
+        category: item.category,
+        tags: item.tags ?? [],
+        ratingOverall: Number(item.rating_overall),
+     }));
+  } else {
+     // Fallback to MOCK_PRODUCTS if DB is empty
+     products = MOCK_PRODUCTS.map(p => ({
+         id: p.id,
+         slug: p.slug,
+         title: p.title,
+         subtitle: p.subtitle,
+         coverImage: p.cover_image,
+         category: p.category,
+         tags: p.tags,
+         ratingOverall: p.rating_overall
+     }));
+  }
 
   return { profile, news, gallery, products };
 }
