@@ -2,6 +2,7 @@ import { NewsNav } from "./news-nav";
 import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NewsArticle } from "@/components/news-article";
+import { canReachSupabase } from "@/lib/supabase/reachability";
 
 export const revalidate = 300;
 
@@ -10,31 +11,41 @@ async function fetchNewsItem(id: number) {
   if (!supabase) {
     return null;
   }
-
-  const { data, error } = await supabase
-    .from("news")
-    .select(
-      "id,date,emoji,title,summary,source,url,content_md,content_html,published_at",
-    )
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error || !data) {
+  if (!(await canReachSupabase(process.env.NEXT_PUBLIC_SUPABASE_URL))) {
     return null;
   }
 
-  return {
-    id: Number(data.id),
-    date: data.date ?? "",
-    emoji: data.emoji ?? "",
-    title: data.title ?? data.content_md ?? "",
-    summary: data.summary ?? "",
-    source: data.source ?? "",
-    url: data.url ?? "",
-    contentMd: data.content_md ?? "",
-    contentHtml: data.content_html ?? "",
-    publishedAt: data.published_at ?? undefined,
-  };
+  try {
+    const { data, error } = await supabase
+      .from("news")
+      .select(
+        "id,date,emoji,title,summary,source,url,content_md,content_html,published_at",
+      )
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return {
+      id: Number(data.id),
+      date: data.date ?? "",
+      emoji: data.emoji ?? "",
+      title: data.title ?? data.content_md ?? "",
+      summary: data.summary ?? "",
+      source: data.source ?? "",
+      url: data.url ?? "",
+      contentMd: data.content_md ?? "",
+      contentHtml: data.content_html ?? "",
+      publishedAt: data.published_at ?? undefined,
+    };
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Supabase news detail fetch failed.", error);
+    }
+    return null;
+  }
 }
 
 export default async function NewsDetail({

@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function NewsNav({ title }: { title: string }) {
   const router = useRouter();

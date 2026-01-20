@@ -13,15 +13,29 @@ type Props = {
 
 // Generate static params for known products
 export async function generateStaticParams() {
-  const products = await getProducts();
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
+  try {
+    const products = await getProducts();
+    return products.map((product) => ({
+      slug: product.slug,
+    }));
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Supabase products fetch failed, skipping static params.", error);
+    }
+    return [];
+  }
 }
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  let product = null;
+  try {
+    product = await getProductBySlug(slug);
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Supabase product fetch failed, showing not found.", error);
+    }
+  }
 
   if (!product) {
     notFound();

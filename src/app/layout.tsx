@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { LanguageProvider } from "@/components/language-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Yuzu",
-    description: "Yuzu 的高能波普 AI 创作基地。",
+    title: "柚子鲸",
+    description: "柚子鲸的高能波普 AI 创作基地。",
     icons: {
         icon: [
             { url: "/yuzu.svg?v=2", type: "image/svg+xml" },
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="zh-CN">
-            <body className="antialiased">{children}</body>
+            <body className="antialiased">
+                <LanguageProvider>{children}</LanguageProvider>
+            </body>
         </html>
     );
 }

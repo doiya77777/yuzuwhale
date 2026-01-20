@@ -18,6 +18,8 @@ import { PopMarkdown } from "@/components/pop-markdown";
 import { getNewsDetail } from "@/app/news/actions";
 import type { NewsDetailData } from "@/components/news-article";
 import { NewsQuickRead } from "@/components/news-quick-read";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useI18n } from "@/components/language-provider";
 
 // Custom X Icon (SVG)
 function XIcon({ className }: { className?: string }) {
@@ -66,14 +68,9 @@ function getNewsLabel(item: SiteConfig["news"][number]) {
 }
 
 export function HomeClient({ data, dailySummary }: HomeClientProps) {
-    const brandName = data.profile.name?.trim() || "Yuzu";
-    const shortBrand =
-        brandName
-            .replace(/yuzu\s*whale/gi, "Yuzu")
-            .replace(/柚子鲸/g, "Yuzu")
-            .replace(/whale|鲸/gi, "")
-            .replace(/\s+/g, " ")
-            .trim() || "Yuzu";
+    const { t } = useI18n();
+    const brandName = data.profile.name?.trim() || t("brand.name");
+    const displayBrand = brandName.replace(/\s+/g, " ").trim();
     const [activeId, setActiveId] = useState<number | null>(null);
     const activeItem = data.gallery.find((item) => item.id === activeId);
     const showGallery =
@@ -204,7 +201,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         />
                     )}
                     <span className="font-black tracking-wide hidden sm:inline">
-                        {shortBrand}
+                        {displayBrand}
                     </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -224,6 +221,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                             </a>
                         );
                     })}
+                    <LanguageToggle />
                 </div>
             </header>
 
@@ -235,7 +233,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                                 {data.profile.title}
                             </p>
                             <h1 className="text-4xl font-black uppercase leading-tight text-[#172554] sm:text-6xl">
-                                {shortBrand}
+                                {displayBrand}
                             </h1>
                             <p className="text-lg font-semibold text-[#172554] sm:text-xl">
                                 {data.profile.slogan}
@@ -256,16 +254,17 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                                 href="/news"
                                 className={`${btnStyle} inline-flex items-center justify-center rounded-full`}
                             >
-                                今日资讯 →
+                                {t("home.cta.news")}
                             </Link>
                             <Link
                                 href="/products"
                                 className={`${btnStyle} inline-flex items-center justify-center rounded-full bg-[#FDE047] active:bg-white`}
                             >
-                                产品测评 🧪
+                                {t("home.cta.products")}
                             </Link>
                             <span className="rounded-full border-2 border-[#172554] bg-white px-4 py-3 text-sm font-bold text-[#172554] hard-shadow">
-                                更新频率：每日
+                                {t("home.tags.frequency")}：
+                                {t("home.tags.frequency.daily")}
                             </span>
                         </div>
                     </div>
@@ -277,10 +276,10 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-[#172554] leading-none">
-                                    Daily Focus
+                                    {t("home.dailyLabel")}
                                 </p>
                                 <p className="text-lg font-black text-[#172554] leading-tight">
-                                    AI 每日简报
+                                    {t("home.dailyFocus")}
                                 </p>
                             </div>
                         </div>
@@ -297,15 +296,17 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         ) : (
                             <div className="mt-5 space-y-3 text-sm font-semibold text-[#172554]">
                                 <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#E0F2FE] px-4 py-3">
-                                    <span>更新频率</span>
-                                    <span>每日</span>
+                                    <span>{t("home.tags.frequency")}</span>
+                                    <span>
+                                        {t("home.tags.frequency.daily")}
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-[#FEF3C7] px-4 py-3">
-                                    <span>内容类型</span>
-                                    <span>资讯 / Prompt</span>
+                                    <span>{t("home.tags.contentType")}</span>
+                                    <span>{t("home.tags.contentValue")}</span>
                                 </div>
                                 <div className="flex items-center justify-between rounded-2xl border-2 border-[#172554] bg-white px-4 py-3">
-                                    <span>合作邮箱</span>
+                                    <span>{t("home.tags.contact")}</span>
                                     <span>{data.profile.email || "-"}</span>
                                 </div>
                             </div>
@@ -319,13 +320,13 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         <div className="flex items-center gap-3">
                             <span className="text-2xl">🧪</span>
                             <h2 className="text-2xl font-black text-[#172554]">
-                                Product Lab / 产品测评
+                                {t("home.section.products")}
                             </h2>
                             <Link
                                 href="/products"
                                 className="ml-auto rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold hard-shadow"
                             >
-                                查看全部 →
+                                {t("home.section.viewAll")}
                             </Link>
                         </div>
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -377,13 +378,13 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                         <div className="flex items-center gap-3">
                             <span className="text-2xl">📰</span>
                             <h2 className="text-2xl font-black text-[#172554]">
-                                News / 情报站
+                                {t("home.section.news")}
                             </h2>
                             <Link
                                 href="/news"
                                 className="ml-auto rounded-full border-2 border-[#172554] bg-white px-3 py-1 text-xs font-bold hard-shadow"
                             >
-                                查看全部 →
+                                {t("home.section.viewAll")}
                             </Link>
                         </div>
                         <div className="space-y-4">
@@ -475,7 +476,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                                 ))
                             ) : (
                                 <div className="rounded-3xl border-4 border-[#172554] bg-white p-5 text-sm font-semibold text-[#1e3a8a] hard-shadow">
-                                    暂无资讯，请先运行 RSS 同步脚本。
+                                    {t("home.section.noNews")}
                                 </div>
                             )}
                         </div>
@@ -486,7 +487,7 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                             <div className="flex items-center gap-3">
                                 <span className="text-2xl">🎨</span>
                                 <h2 className="text-2xl font-black text-[#172554]">
-                                    Gallery / 作品集
+                                    {t("home.section.gallery")}
                                 </h2>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -528,11 +529,13 @@ export function HomeClient({ data, dailySummary }: HomeClientProps) {
                     <div className="rounded-3xl border-4 border-[#172554] bg-white p-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <p className="text-sm font-bold">商务合作</p>
+                                <p className="text-sm font-bold">
+                                    {t("home.footer.biz")}
+                                </p>
                                 <p className="text-sm">{data.profile.email}</p>
                             </div>
                             <div className="text-xs font-semibold">
-                                © 2025 Yuzu. All rights reserved.
+                                {t("home.footer.rights")}
                             </div>
                         </div>
                     </div>

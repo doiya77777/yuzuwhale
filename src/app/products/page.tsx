@@ -1,12 +1,19 @@
 import { getProducts } from "@/lib/supabase/tools";
 import { ProductCard } from "@/components/products/product-card";
-import { Sparkles, ArrowLeft, FlaskConical } from "lucide-react";
+import { ArrowLeft, FlaskConical } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 60; // Revalidate every minute
 
 export default async function ProductsPage() {
-  const products = await getProducts();
+  let products: Awaited<ReturnType<typeof getProducts>> = [];
+  try {
+    products = await getProducts();
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Supabase products fetch failed, showing empty list.", error);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)]">

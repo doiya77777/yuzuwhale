@@ -1,8 +1,19 @@
 import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { NewsClient } from "@/app/news/news-client";
+import { canReachSupabase } from "@/lib/supabase/reachability";
 
 export const revalidate = 300;
+type NewsRow = {
+  id: number;
+  title?: string | null;
+  summary?: string | null;
+  source?: string | null;
+  url?: string | null;
+  emoji?: string | null;
+  date?: string | null;
+  published_at?: string | null;
+};
 
 function normalizeDateParam(value: string | string[] | undefined) {
   if (!value) return "";
@@ -22,7 +33,10 @@ export default async function NewsPage({
   const dateFilter = normalizeDateParam(params.date);
   const supabase = createSupabaseServerClient();
 
-  if (!supabase) {
+  if (
+    !supabase ||
+    !(await canReachSupabase(process.env.NEXT_PUBLIC_SUPABASE_URL))
+  ) {
     return (
       <div className="min-h-screen bg-[linear-gradient(135deg,#FEF9C3_0%,#E0F2FE_100%)] px-6 py-16 text-[#172554]">
         <div className="mx-auto max-w-2xl rounded-3xl border-4 border-[#172554] bg-white p-6 text-center hard-shadow">
@@ -49,9 +63,18 @@ export default async function NewsPage({
     query = query.eq("date", dateFilter);
   }
 
-  const { data: newsItems } = await query
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .order("id", { ascending: false });
+  let newsItems: NewsRow[] | null = null;
+
+  try {
+    const { data } = await query
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false });
+    newsItems = data as NewsRow[] | null;
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Supabase news query failed, returning empty list.", error);
+    }
+  }
 
   const items =
     newsItems?.map((item) => ({
