@@ -3,6 +3,31 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
+/**
+ * 清洗数据库：删除 30 天前的新闻
+ */
+export async function cleanupDatabase() {
+  const supabase = createSupabaseServerClient();
+  if (!supabase) return { error: "Supabase not configured" };
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { error, count } = await supabase
+    .from("news")
+    .delete({ count: "exact" })
+    .lt("published_at", thirtyDaysAgo.toISOString());
+
+  if (error) {
+    console.error("Database cleanup failed", error);
+    return { error: error.message };
+  }
+
+  console.log(`Cleaned up ${count} old news items.`);
+  revalidatePath("/news");
+  return { success: true, count };
+}
+
 export async function getNewsDetail(id: number) {
   const supabase = createSupabaseServerClient();
   if (!supabase) return null;
