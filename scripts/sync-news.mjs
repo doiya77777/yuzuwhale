@@ -23,23 +23,18 @@ if (!OPENAI_API_KEY) {
 const defaultFeeds = [
   {
     name: "OpenAI Blog",
-    url: "https://openai.com/blog/rss.xml",
+    url: "https://openai.com/news/rss.xml",
     emoji: "🧠",
   },
   {
     name: "Anthropic News",
-    url: "https://www.anthropic.com/news/rss.xml",
+    url: "https://www.anthropic.com/news/rss",
     emoji: "⚡",
   },
   {
-    name: "Google AI Blog",
-    url: "https://ai.googleblog.com/feeds/posts/default?alt=rss",
-    emoji: "✨",
-  },
-  {
-    name: "Meta AI",
-    url: "https://ai.meta.com/blog/rss/",
-    emoji: "🧪",
+    name: "DeepSeek News",
+    url: "https://blog.deepseek.com/feed.xml",
+    emoji: "🐋",
   },
 ];
 
